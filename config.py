@@ -169,8 +169,8 @@ mouse = [
 
 
 ## Layouts
-#border_focus = [colours[13], colours[5]]
-border_focus = colours[13]
+border_focus = [colours[13], colours[5]]
+#border_focus = colours[13]
 border_normal = colours[8]
 border_width = 4
 
