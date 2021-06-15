@@ -4,6 +4,7 @@ X11-specific configuration
 
 import os
 
+from libqtile import hook
 from libqtile.lazy import lazy
 
 IS_XEPHYR = int(os.environ.get("QTILE_XEPHYR", 0))
@@ -22,3 +23,11 @@ keys_backend.extend([
     ([mod, 'shift'],    'x',    lazy.spawn('set_monitors'),                 "Configure monitors"),
     ([mod, 'shift'],    'i',    lazy.spawn('slock systemctl suspend -i'),   "Suspend system and lock"),
 ])
+
+
+# Auto-float some windows
+@hook.subscribe.client_new
+def _(window):
+    hints = window.window.get_wm_normal_hints()
+    if hints and 0 < hints['max_width'] < 1920:
+        window.floating = True

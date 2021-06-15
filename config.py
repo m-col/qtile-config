@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from libqtile.core.manager import Qtile
 
 
-HOME: str = os.path.expanduser('~')
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
@@ -85,6 +84,8 @@ else:
 # My keybindings - they are converted at the bottom of this file
 my_keys: List[Tuple[List[str], str, Any, str]] = []
 my_keys.extend(keys_backend)
+my_keys.extend(keys_group)
+my_keys.extend(keys_scratchpad)
 
 
 def float_to_front(qtile: Qtile) -> None:
@@ -287,7 +288,8 @@ class MyVolume(widget.Volume):
             self.text = ''
         # drawing here crashes Wayland
 
-        self.wob = "/tmp/wob-" + qtile.core.display_name
+        if IS_WAYLAND:
+            self.wob = "/tmp/wob-" + qtile.core.display_name
 
     def _update_drawer(self):
         if self.volume <= 0:
@@ -299,8 +301,10 @@ class MyVolume(widget.Volume):
         else:
             self.text = ''
         self.draw()
-        with open(self.wob, 'a') as f:
-            f.write(str(self.volume) + "\n")
+
+        if IS_WAYLAND:
+            with open(self.wob, 'a') as f:
+                f.write(str(self.volume) + "\n")
 
     def cmd_increase_vol(self):
         subprocess.call('amixer set PCM 4%+'.split())
@@ -454,55 +458,6 @@ screens = [
 ]
 
 
-# Hooks
-
-if IS_WAYLAND:
-    from libqtile.backend.wayland.window import Window
-    @hook.subscribe.client_new
-    def _(window):
-        # Auto-float windows
-        if type(window) is Window:
-            state = window.surface.toplevel._ptr.current
-            if 0 < state.max_width < 1920:
-                window.floating = True
-            else:
-                # Just incase I find something new I want to auto-float
-                logger.warning(
-                    (window.name, window.get_wm_class(), (state.min_width, state.max_width))
-                )
-
-else:
-    @hook.subscribe.client_new
-    def _(window):
-        # Auto-float windows
-        hints = window.window.get_wm_normal_hints()
-        if hints and 0 < hints['max_width'] < 1920:
-            window.floating = True
-
-
-## Startup script for Wayland
-if IS_WAYLAND:
-    @hook.subscribe.startup_once
-    async def _():
-        env = os.environ.copy()
-        env["WOB_HEIGHT"] = "32"
-        env["WOB_WIDTH"] = "1920"
-        env["WOB_MARGIN"] = "0"
-        env["WOB_OFFSET"] = "0"
-        env["WOB_BORDER"] = "0"
-        env["WOB_PADDING"] = "0"
-        env["WOB_BACKGROUND"] = "#00000000"
-        env["WOB_BAR"] = "#ff" + foreground[1:]
-        subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
-
-    if IS_XEPHYR:
-        # To adapt to whatever window size it was given
-        @hook.subscribe.startup_once
-        async def _():
-            await asyncio.sleep(0.5)
-            qtile.cmd_reconfigure_screens()
-
-
 ## Config variables
 reconfigure_screens = True
 follow_mouse_focus = True
@@ -510,8 +465,5 @@ bring_front_click = True
 cursor_warp = False
 auto_fullscreen = True
 focus_on_window_activation = 'smart'
-groups.append(scratchpad)
-
-my_keys.extend(keys_group)
-my_keys.extend(keys_scratchpad)
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
+groups.append(scratchpad)
