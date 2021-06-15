@@ -7,7 +7,12 @@ swaybg -c '#1B2021' &
 
 FIFO=/tmp/wob-$WAYLAND_DISPLAY
 test -e $FIFO || mkfifo $FIFO
-tail -f $FIFO | wob -a left -a right -a bottom &
+
+tail -f $FIFO | wob -a bottom \
+    -M ${WOB_MARGIN:-0} -H ${WOB_HEIGHT:-32} -W ${WOB_WIDTH:-400} \
+    -o ${WOB_OFFSET:-0} -b ${WOB_BORDER:-0} -p ${WOB_PADDING:-0} \
+    --background-color ${WOB_BACKGROUND:-#ff000000} \
+    --bar-color ${WOB_BAR:-#00ffffff} &
 
 
 # Things after this are only run on a TTY

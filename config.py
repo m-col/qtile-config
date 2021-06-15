@@ -180,8 +180,9 @@ mouse = [
 ## Layouts
 border_focus = [colours[13], colours[5]]
 #border_focus = colours[13]
-border_normal = colours[8]
-border_width = 4
+border_normal = background
+#border_normal = colours[8]
+border_width = 6
 
 #import qtools.borders
 #qtools.borders.enable('cde')
@@ -556,14 +557,19 @@ if IS_WAYLAND:
     @hook.subscribe.startup_once
     async def _():
         env = os.environ.copy()
-        env["WOB_DEFAULT_HEIGHT"] = str(32)
-        env["WOB_DEFAULT_MARGIN"] = str(0)
+        env["WOB_HEIGHT"] = "32"
+        env["WOB_WIDTH"] = "1920"
+        env["WOB_MARGIN"] = "0"
+        env["WOB_OFFSET"] = "0"
+        env["WOB_BORDER"] = "0"
+        env["WOB_PADDING"] = "0"
+        env["WOB_BACKGROUND"] = "#00000000"
+        env["WOB_BAR"] = "#ff" + foreground[1:]
         subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
 
     if xephyr:
-        @hook.subscribe.startup_once
-        async def _():
-            qtile.cmd_reconfigure_screens()
+        # To adapt to whatever window size it was given
+        hook.subscribe.startup_once(qtile.cmd_reconfigure_screens)
 
 
 ## General settings
