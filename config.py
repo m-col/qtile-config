@@ -261,7 +261,9 @@ groupbox_config = {
     'other_current_screen_border': colours[5],
     'highlight_color': [background, colours[5]],
     'disable_drag': True,
-    'padding': 8,
+    'padding': 4,
+    #'font': 'TamzenForPowerline Bold',
+    'fontsize': 10,
 }
 
 mpd2 = widget.Mpd2(
@@ -270,11 +272,10 @@ mpd2 = widget.Mpd2(
     status_format_stopped='',
     foreground=colours[12],
     idle_format='',
-    fontsize=16,
     font='TamzenForPowerline Bold',
     update_interval=10,
 )
- 
+
 cpugraph = widget.CPUGraph(
     graph_color=colours[12],
     fill_color=colour_unfocussed,
@@ -359,9 +360,6 @@ else:
 wlan = widget.Wlan(
     format='',
     disconnected_message='',
-    mouse_callbacks={
-        'Button1': partial(qtile.cmd_spawn, 'nm-connection-editor'),
-    },
     foreground=colours[5],
     update_interval=5,
 )
@@ -569,7 +567,10 @@ if IS_WAYLAND:
 
     if xephyr:
         # To adapt to whatever window size it was given
-        hook.subscribe.startup_once(qtile.cmd_reconfigure_screens)
+        @hook.subscribe.startup_once
+        async def _():
+            await asyncio.sleep(0.5)
+            qtile.cmd_reconfigure_screens()
 
 
 ## General settings
