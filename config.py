@@ -24,27 +24,18 @@ from groups import groups, keys_group
 if TYPE_CHECKING:
     from typing import List, Tuple
 
+    from libqtile.core.manager import Qtile
 
-## Basic vars
-IS_WAYLAND = qtile.core.name == "wayland"
+
+HOME: str = os.path.expanduser('~')
+IS_WAYLAND: bool = qtile.core.name == "wayland"
+IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
 if IS_WAYLAND:
-    term = 'footclient'
+    from wayland import term, keys_backend, wayland_libinput_config
 else:
-    term = 'xterm'
+    from x11 import term, keys_backend, wmname
 
-xephyr = int(os.environ.get("QTILE_XEPHYR", 0))
-if xephyr:
-    mod = "mod1"
-    alt = "control"
-    if not IS_WAYLAND:
-        # urxvt doesn't like xephyr
-        term = 'xterm'
-else:
-    mod = "mod4"
-    alt = "mod1"
-
-HOME = os.path.expanduser('~')
 
 ## Colours
 theme = dict(
@@ -83,21 +74,31 @@ outer_gaps = 4
 
 ## Keys
 
+if IS_XEPHYR:
+    mod = "mod1"
+    alt = "control"
+else:
+    mod = "mod4"
+    alt = "mod1"
 
-@lazy.function
-def float_to_front(qtile):
+# My keybindings - they are converted at the bottom of this file
+my_keys: List[Tuple[List[str], str, Any, str]] = []
+my_keys.extend(keys_backend)
+
+
+def float_to_front(qtile: Qtile) -> None:
     """ Bring all floating windows of the group to front """
     for window in qtile.current_group.windows:
         if window.floating:
             window.cmd_bring_to_front()
 
 
-my_keys: Tuple[List[str], str, Any, str] = [
+my_keys.extend([
     # Window management
     ([mod, 'control'],  'q',        lazy.window.kill(),                 "Close window"),
     ([mod],             'f',        lazy.window.toggle_fullscreen(),    "Toggle fullscreen"),
     ([mod, 'shift'],    'space',    lazy.window.toggle_floating(),      "Toggle floating"),
-    ([mod],             'space',    float_to_front,                     "Move floating windows to the front"),
+    ([mod],             'space',    lazy.function(float_to_front),      "Move floating windows to the front"),
     ([mod],             'j',        lazy.function(traverse.down),       "Traverse down"),
     ([mod],             'k',        lazy.function(traverse.up),         "Traverse up"),
     ([mod],             'h',        lazy.function(traverse.left),       "Traverse left"),
@@ -116,7 +117,7 @@ my_keys: Tuple[List[str], str, Any, str] = [
     ([mod],             's',        lazy.window.static(),               "Make window static"),
     ([mod, 'control'],  'Escape',   lazy.shutdown(),                    "Shutdown Qtile"),
 
-    # Volume control
+    # Volume control - MyVolume widget is defined further down
     ([], 'XF86AudioMute',         lazy.widget['myvolume'].mute(),         "Mute audio"),
     ([], 'F10',                   lazy.widget['myvolume'].mute(),         "Mute audio"),
     ([], 'XF86AudioRaiseVolume',  lazy.widget['myvolume'].increase_vol(), "Increase volume"),
@@ -138,34 +139,7 @@ my_keys: Tuple[List[str], str, Any, str] = [
     (['shift'],         'Print',    lazy.spawn('screenshot'),                   "Screenshot to file"),
     ([mod],             'p',        lazy.spawn('get_password_rofi'),            "Keepass passwords"),
     ([mod],             'i',        lazy.spawn('systemctl suspend -i'),         "Suspend system"),
-]
-
-
-# Backend-specific launchers
-if IS_WAYLAND:
-    my_keys.extend([
-        ([mod], 'd', lazy.spawn('wofi --gtk-dark --show run'), "wofi: run"),
-    ])
-
-else:
-    my_keys.extend([
-        ([mod],             'd',    lazy.spawn('rofi -show run -theme ~/.config/rofi/common-large.rasi'), "rofi: run"),
-        ([],    'XF86PowerOff',     lazy.spawn('power-menu'),                   "Power menu"),
-        ([mod, 'shift'],    'x',    lazy.spawn('set_monitors'),                 "Configure monitors"),
-        ([mod, 'shift'],    'i',    lazy.spawn('slock systemctl suspend -i'),   "Suspend system and lock"),
-    ])
-
-
-# Changing VT
-if IS_WAYLAND:
-    my_keys.extend([
-        ([mod], 'F1',     lazy.change_vt(1),    "Change to VT 1"),
-        ([mod], 'F2',     lazy.change_vt(2),    "Change to VT 2"),
-        ([mod], 'F3',     lazy.change_vt(3),    "Change to VT 3"),
-        ([mod], 'F4',     lazy.change_vt(4),    "Change to VT 4"),
-        ([mod], 'F5',     lazy.change_vt(5),    "Change to VT 5"),
-        ([mod], 'F6',     lazy.change_vt(6),    "Change to VT 6"),
-    ])
+])
 
 
 ## Mouse control
@@ -565,7 +539,7 @@ if IS_WAYLAND:
         env["WOB_BAR"] = "#ff" + foreground[1:]
         subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
 
-    if xephyr:
+    if IS_XEPHYR:
         # To adapt to whatever window size it was given
         @hook.subscribe.startup_once
         async def _():
@@ -580,18 +554,8 @@ bring_front_click = True
 cursor_warp = False
 auto_fullscreen = True
 focus_on_window_activation = 'smart'
-wmname = 'LG3D'
 
 
 # Reformat keys
 my_keys.extend(keys_group)
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
-
-
-# Configure libinput devices
-if IS_WAYLAND:
-    from libqtile.backend.wayland import InputConfig
-
-    wayland_libinput_config = {
-        "type:pointer": InputConfig(drag=True, tap=True)
-    }
