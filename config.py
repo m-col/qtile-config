@@ -3,11 +3,14 @@ Qtile main config file
 ======================
 """
 
+from __future__ import annotations
+
 import asyncio
 import os
 import sys
 import subprocess
 from functools import partial
+from typing import TYPE_CHECKING
 
 from libqtile import layout, hook, bar, widget, qtile
 from libqtile.config import Key, EzKey, Screen, Group, Drag, Click, Match, ScratchPad, DropDown
@@ -16,6 +19,10 @@ from libqtile.log_utils import logger
 from libqtile.widget.backlight import ChangeDirection
 
 import traverse
+from groups import groups, keys_group
+
+if TYPE_CHECKING:
+    from typing import List, Tuple
 
 
 ## Basic vars
@@ -39,11 +46,10 @@ else:
 
 HOME = os.path.expanduser('~')
 
-
 ## Colours
 theme = dict(
-    foreground='#bcbcbe',
-    background='#030405',
+    foreground='#CFCCD6',
+    background='#1B2021',
     color0='#030405',
     color8='#1f1c32',
     color1='#8742a5',
@@ -53,7 +59,7 @@ theme = dict(
     color3='#653c21',
     color11='#6e9fcd',
     color4='#8f4ff0',
-    color12='#bd9ef9',
+    color12='#BBC2E2',
     color5='#5d479d',
     color13='#998dd1',
     color6='#3e3e73',
@@ -65,15 +71,18 @@ theme = dict(
 colours = [theme[f'color{n}'] for n in range(16)]
 background = theme['background']
 foreground = theme['foreground']
-wm_bw = 5
-wm_cr = 5
-wm_colorfocused = '#6fa3e0'
-wm_colorunfocused = '#0e101c'
-wm_gapsinner = 2
-wm_gapsouter = 2
+bw = 5
+cw = 5
+colour_focussed = '#6fa3e0'
+colour_unfocussed = '#0e101c'
+inner_gaps = 4
+outer_gaps = 4
+
+# https://coolors.co/1b2021-cfccd6-bbc2e2-b7b5e4-847979
 
 
 ## Keys
+
 
 @lazy.function
 def float_to_front(qtile):
@@ -83,7 +92,7 @@ def float_to_front(qtile):
             window.cmd_bring_to_front()
 
 
-keys = [
+my_keys: Tuple[List[str], str, Any, str] = [
     # Window management
     ([mod, 'control'],  'q',        lazy.window.kill(),                 "Close window"),
     ([mod],             'f',        lazy.window.toggle_fullscreen(),    "Toggle fullscreen"),
@@ -134,12 +143,12 @@ keys = [
 
 # Backend-specific launchers
 if IS_WAYLAND:
-    keys.extend([
+    my_keys.extend([
         ([mod], 'd', lazy.spawn('wofi --gtk-dark --show run'), "wofi: run"),
     ])
 
 else:
-    keys.extend([
+    my_keys.extend([
         ([mod],             'd',    lazy.spawn('rofi -show run -theme ~/.config/rofi/common-large.rasi'), "rofi: run"),
         ([],    'XF86PowerOff',     lazy.spawn('power-menu'),                   "Power menu"),
         ([mod, 'shift'],    'x',    lazy.spawn('set_monitors'),                 "Configure monitors"),
@@ -149,7 +158,7 @@ else:
 
 # Changing VT
 if IS_WAYLAND:
-    keys.extend([
+    my_keys.extend([
         ([mod], 'F1',     lazy.change_vt(1),    "Change to VT 1"),
         ([mod], 'F2',     lazy.change_vt(2),    "Change to VT 2"),
         ([mod], 'F3',     lazy.change_vt(3),    "Change to VT 3"),
@@ -189,8 +198,8 @@ layouts = [
         border_on_single = True,
         wrap_focus_columns = False,
         wrap_focus_rows = False,
-        margin = wm_gapsinner,
-        corner_radius = wm_cr,
+        margin = inner_gaps,
+        corner_radius = cw,
     ),
     layout.Max(),
 ]
@@ -199,7 +208,7 @@ floating_layout = layout.Floating(
     border_width = border_width,
     border_focus = border_focus,
     border_normal = border_normal,
-    corner_radius = wm_cr,
+    corner_radius = cw,
     float_rules=[
         Match(title='wlroots - X11-1'),
         Match(title='wlroots - X11-2'),
@@ -244,12 +253,10 @@ widget_defaults = {
     'fontsize': 16,
 }
 
-trim = widget.TextBox(' ', background=colours[8])
-
 groupbox_config = {
     'active': foreground,
     'highlight_method': 'line',
-    'this_current_screen_border': wm_colorfocused,
+    'this_current_screen_border': colour_focussed,
     'other_current_screen_border': colours[5],
     'highlight_color': [background, colours[5]],
     'disable_drag': True,
@@ -269,7 +276,7 @@ mpd2 = widget.Mpd2(
  
 cpugraph = widget.CPUGraph(
     graph_color=colours[12],
-    fill_color=wm_colorunfocused,
+    fill_color=colour_unfocussed,
     border_width=0,
     margin_x=10,
     margin_y=4,
@@ -344,7 +351,7 @@ volume = MyVolume(
 )
 
 if IS_WAYLAND:
-    systray = trim
+    systray = widget.TextBox('')
 else:
     systray = widget.Systray(padding=20)
 
@@ -421,97 +428,36 @@ groupboxes = [
     widget.GroupBox(**groupbox_config, visible_groups=['q', 'w', 'e']),
 ]
 
-gaps = wm_gapsinner + wm_gapsouter
 screens = [
     Screen(
-        top=bar.Bar(
+        bottom=bar.Bar(
             [
-                trim, groupboxes[0], trim, cpugraph, widget.Spacer(), mpd2,
+                groupboxes[0], cpugraph, widget.Spacer(), mpd2,
                 widget.Spacer(), systray, bklight, volume, wlan,
-                battery, trim, date, time, trim
+                battery, date, time, 
             ],
-            40,
+            32,
             background=background,
-            margin=[gaps, gaps, wm_gapsouter, gaps],
         ),
-        wallpaper_mode='fill',
-        bottom=bar.Gap(wm_gapsouter),
-        left=bar.Gap(wm_gapsouter),
-        right=bar.Gap(wm_gapsouter),
-        wallpaper=f'{HOME}/pictures/pixart/diver.png'
+        top=bar.Gap(outer_gaps),
+        left=bar.Gap(outer_gaps),
+        right=bar.Gap(outer_gaps),
     ),
     Screen(
-        top=bar.Bar(
+        bottom=bar.Bar(
             [
-                trim, groupboxes[1], trim, cpugraph, widget.Spacer(), mpd2,
+                groupboxes[1], cpugraph, widget.Spacer(), mpd2,
                 widget.Spacer(), bklight, volume, wlan,
-                battery, trim, date, time, trim
+                battery, date, time
             ],
-            40,
+            32,
             background=background,
-            margin=[gaps, gaps, wm_gapsouter, gaps],
         ),
-        wallpaper_mode='fill',
-        bottom=bar.Gap(wm_gapsouter),
-        left=bar.Gap(wm_gapsouter),
-        right=bar.Gap(wm_gapsouter),
-        wallpaper=f'{HOME}/pictures/pixart/diver.png'
+        top=bar.Gap(outer_gaps),
+        left=bar.Gap(outer_gaps),
+        right=bar.Gap(outer_gaps),
     ),
 ]
-
-## Groups
-groups = [
-    Group('1', label=''),
-    Group('2', label='', matches=[Match(wm_class='Tor Browser'), Match(wm_class='hyperspace desktop')]),
-    Group('3', label='', matches=[Match(wm_class='firefox')]),
-    Group('q', label=''),
-    Group('w', label='', matches=[Match(wm_class='Slack')]),
-    Group('e', label='', matches=[Match(wm_class='halebird')]),
-]
-
-def _go_to_group(group):
-    def _inner(qtile):
-        if len(qtile.screens) > 1:
-            old = qtile.current_screen.group.name
-            if group in '123':
-                qtile.focus_screen(0)
-                if old in '123' or qtile.current_screen.group.name != group:
-                    qtile.groups_map[group].cmd_toscreen()
-            else:
-                qtile.focus_screen(1)
-                if old in 'qwe' or qtile.current_screen.group.name != group:
-                    qtile.groups_map[group].cmd_toscreen()
-        else:
-            qtile.groups_map[group].cmd_toscreen()
-    return _inner
-
-for i in groups:
-    keys.extend([
-        ([mod],             i.name, lazy.function(_go_to_group(i.name)), f"Go to group {i.name}"),
-        ([mod, 'shift'],    i.name, lazy.window.togroup(i.name), f"Send window to group {i.name}"),
-    ])
-
-
-def _scroll_screen(direction):
-    """ Scroll next group of subset allocated to specific screen """
-    def _inner(qtile):
-        if len(qtile.screens) > 1:
-            current = qtile.groups.index(qtile.current_group)
-            if current < 3:
-                destination = (current + direction) % 3
-            else:
-                destination = ((current - 3 + direction) % 3) + 3
-            qtile.groups[destination].cmd_toscreen()
-        else:
-            current = qtile.groups.index(qtile.current_group)
-            destination = (current + direction) % 6
-            qtile.groups[destination].cmd_toscreen()
-    return _inner
-
-keys.extend([
-    ([mod], 'm', lazy.function(_scroll_screen(1)),  "Screen groups forward"),
-    ([mod], 'n', lazy.function(_scroll_screen(-1)), "Screen groups backward"),
-])
 
 
 # Dropdowns and Scratchpad
@@ -543,7 +489,7 @@ else:
 
 groups.append(ScratchPad("scratchpad", dropdowns))
 
-keys.extend([
+my_keys.extend([
     ([mod, 'shift'],     'Return',   lazy.group['scratchpad'].dropdown_toggle('tmux'), "Toggle tmux scratchpad"),
     ([mod, 'control'],   'e',        lazy.group['scratchpad'].dropdown_toggle('email'), "Toggle email scratchpad"),
     ([mod, 'control'],   'w',        lazy.group['scratchpad'].dropdown_toggle('irc'), "Toggle irc scratchpad"),
@@ -608,8 +554,11 @@ async def _(_):
 ## Startup script for Wayland
 if IS_WAYLAND:
     @hook.subscribe.startup_once
-    async def auto_start():
-        qtile.cmd_spawn(f"{HOME}/.config/qtile/startup.sh", shell=True)
+    async def _():
+        env = os.environ.copy()
+        env["WOB_DEFAULT_HEIGHT"] = str(32)
+        env["WOB_DEFAULT_MARGIN"] = str(0)
+        subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
 
     if xephyr:
         @hook.subscribe.startup_once
@@ -628,7 +577,8 @@ wmname = 'LG3D'
 
 
 # Reformat keys
-keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in keys]
+my_keys.extend(keys_group)
+keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 
 
 # Configure libinput devices

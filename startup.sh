@@ -3,10 +3,11 @@
 # Qtile Wayland startup script
 
 foot --server &
+swaybg -c '#1B2021' &
 
 FIFO=/tmp/wob-$WAYLAND_DISPLAY
 test -e $FIFO || mkfifo $FIFO
-tail -f $FIFO | wob -a top &
+tail -f $FIFO | wob -a left -a right -a bottom &
 
 
 # Things after this are only run on a TTY
