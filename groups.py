@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+from libqtile import hook, qtile
 from libqtile.config import Group, Match
 from libqtile.lazy import lazy
 
@@ -94,3 +95,20 @@ keys_group.extend([
     ([mod], 'm', lazy.function(_scroll_screen(1)),  "Screen groups forward"),
     ([mod], 'n', lazy.function(_scroll_screen(-1)), "Screen groups backward"),
 ])
+
+
+@hook.subscribe.startup
+def _():
+    # Set initial groups
+    if len(qtile.screens) > 1:
+        qtile.groups_map['1'].cmd_toscreen(0, toggle=False)
+        qtile.groups_map['q'].cmd_toscreen(1, toggle=False)
+
+
+@hook.subscribe.screen_change
+def _():
+    # Set groups to screens
+    if len(qtile.screens) > 1:
+        if qtile.screens[0].group.name not in '123':
+            qtile.groups_map['1'].cmd_toscreen(0, toggle=False)
+        qtile.groups_map['q'].cmd_toscreen(1, toggle=False)

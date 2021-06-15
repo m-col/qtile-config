@@ -402,6 +402,26 @@ groupboxes = [
     widget.GroupBox(**groupbox_config, visible_groups=['q', 'w', 'e']),
 ]
 
+@hook.subscribe.startup
+def _():
+    # Set up initial GroupBox visible groups
+    if len(qtile.screens) > 1:
+        groupboxes[0].visible_groups = ['1', '2', '3']
+    else:
+        groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
+
+@hook.subscribe.screen_change
+async def _(_):
+    # Reconfigure GroupBox visible groups
+    await asyncio.sleep(1)  # Am I gonna fix this?
+    if len(qtile.screens) > 1:
+        groupboxes[0].visible_groups = ['1', '2', '3']
+    else:
+        groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
+    if hasattr(groupboxes[0], 'bar'):
+        groupboxes[0].bar.draw()
+
+
 screens = [
     Screen(
         bottom=bar.Bar(
@@ -436,17 +456,6 @@ screens = [
 
 # Hooks
 
-@hook.subscribe.startup
-def _():
-    # Set initial groups
-    if len(qtile.screens) > 1:
-        qtile.groups_map['1'].cmd_toscreen(0, toggle=False)
-        qtile.groups_map['q'].cmd_toscreen(1, toggle=False)
-        groupboxes[0].visible_groups = ['1', '2', '3']
-    else:
-        groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
-
-
 if IS_WAYLAND:
     from libqtile.backend.wayland.window import Window
     @hook.subscribe.client_new
@@ -469,21 +478,6 @@ else:
         hints = window.window.get_wm_normal_hints()
         if hints and 0 < hints['max_width'] < 1920:
             window.floating = True
-
-
-@hook.subscribe.screen_change
-async def _(_):
-    # Set up GroupBox visible groups
-    await asyncio.sleep(1)
-    if len(qtile.screens) > 1:
-        groupboxes[0].visible_groups = ['1', '2', '3']
-        if qtile.screens[0].group.name not in "123":
-            qtile.groups_map['1'].cmd_toscreen(0, toggle=False)
-        qtile.groups_map['q'].cmd_toscreen(1, toggle=False)
-    else:
-        groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
-    if hasattr(groupboxes[0], 'bar'):
-        groupboxes[0].bar.draw()
 
 
 ## Startup script for Wayland
