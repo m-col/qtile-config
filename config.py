@@ -435,7 +435,7 @@ screens = [
                 widget.Spacer(), systray, bklight, volume, wlan,
                 battery, date, time, 
             ],
-            32,
+            28,
             background=background,
         ),
         top=bar.Gap(outer_gaps),
@@ -449,7 +449,7 @@ screens = [
                 widget.Spacer(), bklight, volume, wlan,
                 battery, date, time
             ],
-            32,
+            28,
             background=background,
         ),
         top=bar.Gap(outer_gaps),
