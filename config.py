@@ -189,6 +189,8 @@ floating_layout = layout.Floating(
     float_rules=[
         Match(title='wlroots - X11-1'),
         Match(title='wlroots - X11-2'),
+        Match(title='wlroots - WL-1'),
+        Match(title='wlroots - WL-2'),
         Match(title='Open File'),
         Match(wm_class='Arandr'),
         Match(wm_class='confirm'),
@@ -237,15 +239,22 @@ groupbox_config = {
     'fontsize': 12,
 }
 
-mpd2 = widget.Mpd2(
-    no_connection='',
-    status_format='{artist} - {title}',
-    status_format_stopped='',
-    foreground=colours[12],
-    idle_format='',
-    font='TamzenForPowerline Bold',
-    update_interval=10,
-)
+if IS_XEPHYR:
+    mpd2 = widget.TextBox(
+        'mpd here',
+        foreground=colours[12],
+        font='TamzenForPowerline Bold',
+    )
+else:
+    mpd2 = widget.Mpd2(
+        no_connection='',
+        status_format='{artist} - {title}',
+        status_format_stopped='',
+        foreground=colours[12],
+        idle_format='',
+        font='TamzenForPowerline Bold',
+        update_interval=10,
+    )
 
 cpugraph = widget.CPUGraph(
     graph_color=colours[12],
@@ -255,7 +264,7 @@ cpugraph = widget.CPUGraph(
     margin_y=4,
     samples=50,
     line_width=4,
-    width=200,
+    width=50 if IS_XEPHYR else 200,
     type='box',
     frequency=1,
 )
