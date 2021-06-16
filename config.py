@@ -7,23 +7,21 @@ from __future__ import annotations
 
 import asyncio
 import os
-import sys
 import subprocess
-from functools import partial
 from typing import TYPE_CHECKING
 
-from libqtile import layout, hook, bar, widget, qtile
-from libqtile.config import Key, EzKey, Screen, Group, Drag, Click, Match, ScratchPad, DropDown
+from libqtile import bar, hook, layout, qtile, widget
+from libqtile.config import Drag, Key, Match, Screen
 from libqtile.lazy import lazy
-from libqtile.log_utils import logger
 from libqtile.widget.backlight import ChangeDirection
+from libqtile.widget.battery import Battery, BatteryState
 
 import traverse
 from groups import groups, keys_group
-from scratchpad import scratchpad, keys_scratchpad
+from scratchpad import keys_scratchpad, scratchpad
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import Any, List, Tuple
 
     from libqtile.core.manager import Qtile
 
@@ -32,12 +30,12 @@ IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
 if IS_WAYLAND:
-    from wayland import term, keys_backend, wayland_libinput_config
+    from wayland import keys_backend, term, wayland_libinput_config  # noqa: F401
 else:
-    from x11 import term, keys_backend, wmname
+    from x11 import keys_backend, term, wmname  # noqa: F401
 
 
-## Colours
+# Colours
 theme = dict(
     foreground='#CFCCD6',
     background='#1B2021',
@@ -72,7 +70,7 @@ outer_gaps = 0
 # https://coolors.co/1b2021-cfccd6-bbc2e2-b7b5e4-847979
 
 
-## Keys
+# Keys
 
 if IS_XEPHYR:
     mod = "mod1"
@@ -128,16 +126,20 @@ my_keys.extend([
     ([], 'F11',                   lazy.widget['myvolume'].decrease_vol(), "Decrease volume"),
 
     # Backlight control
-    ([], 'XF86MonBrightnessUp',   lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
-    ([], 'XF86MonBrightnessDown', lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
-    ([], 'F6',                    lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
-    ([], 'F5',                    lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
+    ([], 'XF86MonBrightnessUp',
+        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
+    ([], 'XF86MonBrightnessDown',
+        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
+    ([], 'F6',
+        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
+    ([], 'F5',
+        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
 
     # Launchers
     ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
     ([mod],             'Return',   lazy.spawn(term),                           "Spawn terminal"),
     ([mod, 'shift'],    'f',        lazy.spawn("firefox"),                      "Spawn Firefox"),
-    ([mod, 'control'],  'f',        lazy.spawn("tor-browser --allow-remote") ,  "Spawn Tor Browser"),
+    ([mod, 'control'],  'f',        lazy.spawn("tor-browser --allow-remote"),   "Spawn Tor Browser"),
     ([],                'Print',    lazy.spawn("screenshot copy"),              "Screenshot to clipboard"),
     (['shift'],         'Print',    lazy.spawn('screenshot'),                   "Screenshot to file"),
     ([mod],             'p',        lazy.spawn('get_password_rofi'),            "Keepass passwords"),
@@ -145,16 +147,14 @@ my_keys.extend([
 ])
 
 
-## Mouse control
+# Mouse control
 mouse = [
-    Drag([mod], "Button1",      lazy.window.set_position_floating(),    start=lazy.window.get_position()),
+    Drag([mod], "Button1",      lazy.window.set_position_floating(), start=lazy.window.get_position()),
     Drag([mod, alt], "Button1", lazy.window.set_size_floating(), start=lazy.window.get_size()),
-    Click([mod], "Button4",     lazy.layout.grow_up()),
-    Click([mod], "Button5",     lazy.layout.grow_down()),
 ]
 
 
-## Layouts
+# Layouts
 border_focus = [colours[13], colours[5]]
 #border_focus = colours[13]
 border_normal = background
@@ -168,24 +168,24 @@ border_normal = background
 
 layouts = [
     layout.Columns(
-        insert_position = 1,
-        border_width = bw,
-        border_focus = border_focus,
-        border_normal = border_normal,
-        border_on_single = True,
-        wrap_focus_columns = False,
-        wrap_focus_rows = False,
-        margin = inner_gaps,
-        corner_radius = cw,
+        insert_position=1,
+        border_width=bw,
+        border_focus=border_focus,
+        border_normal=border_normal,
+        border_on_single=True,
+        wrap_focus_columns=False,
+        wrap_focus_rows=False,
+        margin=inner_gaps,
+        corner_radius=cw,
     ),
     layout.Max(),
 ]
 
 floating_layout = layout.Floating(
-    border_width = bw,
-    border_focus = border_focus,
-    border_normal = border_normal,
-    corner_radius = cw,
+    border_width=bw,
+    border_focus=border_focus,
+    border_normal=border_normal,
+    corner_radius=cw,
     float_rules=[
         Match(title='wlroots - X11-1'),
         Match(title='wlroots - X11-2'),
@@ -219,7 +219,7 @@ floating_layout = layout.Floating(
 )
 
 
-## Screens and Bars
+# Screens and Bars
 widget_defaults = {
     'padding': 10,
     'foreground': foreground,
@@ -278,6 +278,7 @@ bklight = widget.Backlight(
     foreground=colours[3],
 )
 
+
 class MyVolume(widget.Volume):
     def _configure(self, qtile, bar):
         widget.Volume._configure(self, qtile, bar)
@@ -314,10 +315,12 @@ class MyVolume(widget.Volume):
         subprocess.call('amixer set PCM 4%+'.split())
         self.volume = self.get_volume()
         self._update_drawer()
+
     def cmd_decrease_vol(self):
         subprocess.call('amixer set PCM 4%-'.split())
         self.volume = self.get_volume()
         self._update_drawer()
+
     def cmd_mute(self):
         subprocess.call('amixer set Master toggle'.split())
         self.channel = 'Master'
@@ -326,6 +329,7 @@ class MyVolume(widget.Volume):
         if self.volume == 0:
             self.volume = self.get_volume()
         self._update_drawer()
+
 
 volume = MyVolume(
     fontsize=18,
@@ -347,7 +351,7 @@ wlan = widget.Wlan(
     update_interval=5,
 )
 
-from libqtile.widget.battery import Battery, BatteryState
+
 class MyBattery(Battery):
     def build_string(self, status):
         if self.layout is not None:
@@ -377,11 +381,11 @@ class MyBattery(Battery):
         self.timer_setup()
 
     def button_press(self, x, y, button):
-        old = self.format
         self.format = '{percent:2.0%}'
-        self.font='TamzenForPowerline Bold'
+        self.font = 'TamzenForPowerline Bold'
         self.timer_setup()
         self.timeout_add(1, self.restore)
+
 
 battery = MyBattery(
     format='{char}',
@@ -410,6 +414,7 @@ groupboxes = [
     widget.GroupBox(**groupbox_config, visible_groups=['q', 'w', 'e']),
 ]
 
+
 @hook.subscribe.startup
 def _():
     # Set up initial GroupBox visible groups
@@ -417,6 +422,7 @@ def _():
         groupboxes[0].visible_groups = ['1', '2', '3']
     else:
         groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
+
 
 @hook.subscribe.screen_change
 async def _(_):
@@ -475,7 +481,7 @@ screens = [
 ]
 
 
-## Config variables
+# Config variables
 reconfigure_screens = True
 follow_mouse_focus = True
 bring_front_click = True

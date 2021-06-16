@@ -17,7 +17,7 @@ from libqtile.config import Group, Match
 from libqtile.lazy import lazy
 
 if TYPE_CHECKING:
-    from typing import Callable, List, Tuple
+    from typing import Any, Callable, List, Tuple
 
     from libqtile.core.manager import Qtile
 
@@ -50,13 +50,13 @@ def _go_to_group(name: str) -> Callable:
             return
 
         old = qtile.current_screen.group.name
-        if group in '123':
+        if name in '123':
             qtile.focus_screen(0)
-            if old in '123' or qtile.current_screen.group.name != group:
+            if old in '123' or qtile.current_screen.group.name != name:
                 qtile.groups_map[name].cmd_toscreen()
         else:
             qtile.focus_screen(1)
-            if old in 'qwe' or qtile.current_screen.group.name != group:
+            if old in 'qwe' or qtile.current_screen.group.name != name:
                 qtile.groups_map[name].cmd_toscreen()
 
     return _inner
