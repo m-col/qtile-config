@@ -62,12 +62,12 @@ theme = dict(
 colours = [theme[f'color{n}'] for n in range(16)]
 background = theme['background']
 foreground = theme['foreground']
-bw = 5
+bw = 6
 cw = 5
 colour_focussed = '#6fa3e0'
 colour_unfocussed = '#0e101c'
-inner_gaps = 4
-outer_gaps = 4
+inner_gaps = 8
+outer_gaps = 0
 
 # https://coolors.co/1b2021-cfccd6-bbc2e2-b7b5e4-847979
 
@@ -134,6 +134,7 @@ my_keys.extend([
     ([], 'F5',                    lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
 
     # Launchers
+    ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
     ([mod],             'Return',   lazy.spawn(term),                           "Spawn terminal"),
     ([mod, 'shift'],    'f',        lazy.spawn("firefox"),                      "Spawn Firefox"),
     ([mod, 'control'],  'f',        lazy.spawn("tor-browser --allow-remote") ,  "Spawn Tor Browser"),
@@ -158,7 +159,6 @@ border_focus = [colours[13], colours[5]]
 #border_focus = colours[13]
 border_normal = background
 #border_normal = colours[8]
-border_width = 6
 
 #import qtools.borders
 #qtools.borders.enable('cde')
@@ -169,7 +169,7 @@ border_width = 6
 layouts = [
     layout.Columns(
         insert_position = 1,
-        border_width = border_width,
+        border_width = bw,
         border_focus = border_focus,
         border_normal = border_normal,
         border_on_single = True,
@@ -182,7 +182,7 @@ layouts = [
 ]
 
 floating_layout = layout.Floating(
-    border_width = border_width,
+    border_width = bw,
     border_focus = border_focus,
     border_normal = border_normal,
     corner_radius = cw,
@@ -194,23 +194,18 @@ floating_layout = layout.Floating(
         Match(wm_class='confirm'),
         Match(wm_class='dialog'),
         Match(wm_class='download'),
-        Match(wm_class='Dragon'),
         Match(wm_class='error'),
         Match(wm_class='fiji-Main'),
         Match(wm_class='file_progress'),
-        Match(wm_class='fontforge'),
         Match(wm_class='imv'),
-        Match(wm_class='love'),
         Match(wm_class='lxappearance'),
         Match(wm_class='mpv'),
-        Match(wm_class='Nm-connection-editor'),
         Match(wm_class='notification'),
-        Match(wm_class='Oomox'),
         Match(wm_class='Pavucontrol'),
         Match(wm_class='Pinentry-gtk-2'),
         Match(wm_class='qt5ct'),
         Match(wm_class='ssh-askpass'),
-        Match(wm_class='tinyterm'),
+        Match(wm_class='Dragon'),
         Match(wm_class='Dragon-drag-and-drop'),
         Match(wm_class='toolbar'),
         Match(wm_class='Xephyr'),
@@ -232,14 +227,14 @@ widget_defaults = {
 
 groupbox_config = {
     'active': foreground,
-    'highlight_method': 'line',
+    'highlight_method': 'block',
     'this_current_screen_border': colour_focussed,
     'other_current_screen_border': colours[5],
     'highlight_color': [background, colours[5]],
     'disable_drag': True,
     'padding': 4,
-    #'font': 'TamzenForPowerline Bold',
-    'fontsize': 10,
+    'font': 'TamzenForPowerline Bold',
+    'fontsize': 12,
 }
 
 mpd2 = widget.Mpd2(
@@ -426,13 +421,24 @@ async def _(_):
         groupboxes[0].bar.draw()
 
 
+prompt = widget.Prompt(
+    fontsize=20,
+    font='TamzenForPowerline Medium',
+    cursor_color=foreground,
+    visual_bell_color=foreground,
+    background=colours[5],
+    bell_style='visual',
+)
+
 screens = [
     Screen(
         bottom=bar.Bar(
             [
-                groupboxes[0], cpugraph, widget.Spacer(), mpd2,
-                widget.Spacer(), systray, bklight, volume, wlan,
-                battery, date, time, 
+                groupboxes[0], cpugraph, prompt,  # Left
+                widget.Spacer(),
+                mpd2,  # Centre
+                widget.Spacer(),
+                systray, bklight, volume, wlan, battery, date, time,  # Right
             ],
             28,
             background=background,
@@ -444,9 +450,11 @@ screens = [
     Screen(
         bottom=bar.Bar(
             [
-                groupboxes[1], cpugraph, widget.Spacer(), mpd2,
-                widget.Spacer(), bklight, volume, wlan,
-                battery, date, time
+                groupboxes[1], cpugraph,  # Left
+                widget.Spacer(),
+                mpd2,  # Centre
+                widget.Spacer(),
+                bklight, volume, wlan, battery, date, time,  # Right
             ],
             28,
             background=background,

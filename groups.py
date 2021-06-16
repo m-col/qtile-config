@@ -31,7 +31,7 @@ groups: List[Group] = [
     Group('1', label='term'),
     Group('2', label='term'),
     Group('3', label='term'),
-    Group('q', label='surf', matches=[Match(wm_class='firefox')]),
+    Group('q', label='surf', matches=[Match(wm_class='firefox')], layout='max'),
     Group('w', label='chat'),
     Group('e', label='toot', matches=[Match(wm_class='hyperspace desktop')]),
 ]

@@ -12,7 +12,7 @@ tail -f $FIFO | wob -a bottom \
     -M ${WOB_MARGIN:-0} -H ${WOB_HEIGHT:-32} -W ${WOB_WIDTH:-400} \
     -o ${WOB_OFFSET:-0} -b ${WOB_BORDER:-0} -p ${WOB_PADDING:-0} \
     --background-color ${WOB_BACKGROUND:-#ff000000} \
-    --bar-color ${WOB_BAR:-#00ffffff} &
+    --bar-color ${WOB_BAR:-#00ffffff} -t 800 &
 
 
 # Things after this are only run on a TTY

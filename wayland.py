@@ -31,9 +31,9 @@ keys_backend.extend([
 
 
 # Keys to run Wayland-only launchers
-keys_backend.extend([
-    ([mod], 'd', lazy.spawn('wofi --gtk-dark --show run'), "wofi: run"),
-])
+#keys_backend.extend([
+#    ([mod], 'd', lazy.spawn('wofi --gtk-dark --show run'), "wofi: run"),
+#])
 
 
 # Configure libinput devices
@@ -60,14 +60,14 @@ def _(window):
 async def _():
     # Run a startup script
     env = os.environ.copy()
-    env["WOB_HEIGHT"] = "32"
+    env["WOB_HEIGHT"] = "28"
     env["WOB_WIDTH"] = "1920"
     env["WOB_MARGIN"] = "0"
     env["WOB_OFFSET"] = "0"
     env["WOB_BORDER"] = "0"
     env["WOB_PADDING"] = "0"
     env["WOB_BACKGROUND"] = "#00000000"
-    env["WOB_BAR"] = "#ffCFCCD6"
+    env["WOB_BAR"] = "#66CFCCD6"
     HOME = os.path.expanduser('~')
     subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
 
