@@ -106,7 +106,7 @@ def _():
 
 
 @hook.subscribe.screen_change
-def _():
+def _(_):
     # Set groups to screens
     if len(qtile.screens) > 1:
         if qtile.screens[0].group.name not in '123':

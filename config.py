@@ -465,7 +465,7 @@ screens = [
     Screen(
         bottom=bar.Bar(
             [
-                groupboxes[1], cpugraph,  # Left
+                groupboxes[1], cpugraph, prompt,  # Left
                 widget.Spacer(),
                 mpd2,  # Centre
                 widget.Spacer(),

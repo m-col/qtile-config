@@ -38,7 +38,7 @@ keys_backend.extend([
 
 # Configure libinput devices
 wayland_libinput_config = {
-    "type:pointer": InputConfig(drag=True, tap=True)
+    "type:pointer": InputConfig(drag=True, tap=True, pointer_accel=0.4)
 }
 
 
