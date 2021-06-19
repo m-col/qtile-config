@@ -7,7 +7,6 @@ import os
 import subprocess
 
 from libqtile import hook, qtile
-from libqtile.backend.wayland import InputConfig
 from libqtile.backend.wayland.window import Window
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
@@ -37,9 +36,13 @@ keys_backend.extend([
 
 
 # Configure libinput devices
-wayland_libinput_config = {
-    "type:pointer": InputConfig(drag=True, tap=True, pointer_accel=0.4)
-}
+try:
+    from libqtile.backend.wayland import InputConfig
+    wayland_libinput_config = {
+        "type:pointer": InputConfig(drag=True, tap=True, pointer_accel=0.4)
+    }
+except ImportError:
+    wayland_libinput_config = None
 
 
 @hook.subscribe.client_new
@@ -69,7 +72,8 @@ async def _():
     env["WOB_BACKGROUND"] = "#00000000"
     env["WOB_BAR"] = "#66CFCCD6"
     HOME = os.path.expanduser('~')
-    subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
+    p = subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
+    hook.subscribe.shutdown(p.terminate)
 
 
 if IS_XEPHYR:
