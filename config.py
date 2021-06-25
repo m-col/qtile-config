@@ -6,8 +6,10 @@ Qtile main config file
 from __future__ import annotations
 
 import asyncio
+import importlib
 import os
 import subprocess
+import sys
 from typing import TYPE_CHECKING
 
 from libqtile import bar, hook, layout, qtile, widget
@@ -16,8 +18,16 @@ from libqtile.lazy import lazy
 from libqtile.widget.backlight import ChangeDirection
 from libqtile.widget.battery import Battery, BatteryState
 
+def reload(module):
+    if module in sys.modules:
+        importlib.reload(sys.modules[module])
+
+reload("traverse")
 import traverse
+
+reload("groups")
 from groups import groups, keys_group
+reload("scratchpad")
 from scratchpad import keys_scratchpad, scratchpad
 
 if TYPE_CHECKING:
@@ -29,6 +39,7 @@ if TYPE_CHECKING:
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
+reload(qtile.core.name)
 if IS_WAYLAND:
     from wayland import keys_backend, term, wayland_libinput_config  # noqa: F401
 else:
@@ -111,7 +122,8 @@ my_keys.extend([
     ([mod, alt],        'k',        lazy.layout.grow_up(),              "Grow up"),
     ([mod, alt],        'h',        lazy.layout.grow_left(),            "Grow left"),
     ([mod, alt],        'l',        lazy.layout.grow_right(),           "Grow right"),
-    ([mod, 'shift'],    'r',        lazy.restart(),                     "Restart Qtile"),
+    ([mod, 'shift'],    'r',        lazy.reload_config(),               "Reload the config"),
+    ([mod, 'control'],  'r',        lazy.restart(),                     "Restart Qtile"),
     ([mod],             'Tab',      lazy.next_layout(),                 "Next layout"),
     ([mod, 'control'],  'h',        lazy.window.toggle_minimize(),      "Minimise window"),
     ([mod],             's',        lazy.window.static(),               "Make window static"),
