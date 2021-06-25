@@ -13,6 +13,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from libqtile import bar, hook, layout, qtile, widget
+from libqtile.backend import base
 from libqtile.config import Drag, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.widget.backlight import ChangeDirection
@@ -428,6 +429,14 @@ def _():
         groupboxes[0].visible_groups = ['1', '2', '3']
     else:
         groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
+
+
+@hook.subscribe.client_focus
+def _(_):
+    # Keep Static windows on top
+    for window in qtile.windows_map.values():
+        if isinstance(window, base.Static):
+            window.cmd_bring_to_front()
 
 
 @hook.subscribe.screen_change
