@@ -302,7 +302,7 @@ class MyVolume(widget.Volume):
         if IS_WAYLAND:
             self.wob = "/tmp/wob-" + qtile.core.display_name
 
-    def _update_drawer(self):
+    def _update_drawer(self, wob=False):
         if self.volume <= 0:
             self.text = ''
         elif self.volume <= 15:
@@ -313,19 +313,19 @@ class MyVolume(widget.Volume):
             self.text = ''
         self.draw()
 
-        if IS_WAYLAND:
+        if wob:
             with open(self.wob, 'a') as f:
                 f.write(str(self.volume) + "\n")
 
     def cmd_increase_vol(self):
         subprocess.call('amixer set PCM 4%+'.split())
         self.volume = self.get_volume()
-        self._update_drawer()
+        self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_decrease_vol(self):
         subprocess.call('amixer set PCM 4%-'.split())
         self.volume = self.get_volume()
-        self._update_drawer()
+        self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_mute(self):
         subprocess.call('amixer set Master toggle'.split())
@@ -334,7 +334,7 @@ class MyVolume(widget.Volume):
         self.channel = 'PCM'
         if self.volume == 0:
             self.volume = self.get_volume()
-        self._update_drawer()
+        self._update_drawer(wob=IS_WAYLAND)
 
 
 volume = MyVolume(
