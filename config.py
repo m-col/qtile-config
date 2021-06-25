@@ -252,22 +252,15 @@ groupbox_config = {
     'fontsize': 12,
 }
 
-if IS_XEPHYR:
-    mpd2 = widget.TextBox(
-        'mpd here',
-        foreground=colours[12],
-        font='TamzenForPowerline Bold',
-    )
-else:
-    mpd2 = widget.Mpd2(
-        no_connection='',
-        status_format='{artist} - {title}',
-        status_format_stopped='',
-        foreground=colours[12],
-        idle_format='',
-        font='TamzenForPowerline Bold',
-        update_interval=10,
-    )
+mpd2 = widget.Mpd2(
+    no_connection='',
+    status_format='mpd here' if IS_XEPHYR else '{artist} - {title}',
+    status_format_stopped='',
+    foreground=colours[12],
+    idle_format='',
+    font='TamzenForPowerline Bold',
+    update_interval=10,
+)
 
 cpugraph = widget.CPUGraph(
     graph_color=colours[12],
