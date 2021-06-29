@@ -19,23 +19,24 @@ from libqtile.lazy import lazy
 from libqtile.widget.backlight import ChangeDirection
 from libqtile.widget.battery import Battery, BatteryState
 
-def reload(module):
-    if module in sys.modules:
-        importlib.reload(sys.modules[module])
-
-reload("traverse")
-import traverse
-
-reload("groups")
-from groups import groups, keys_group
-reload("scratchpad")
-from scratchpad import keys_scratchpad, scratchpad
-
 if TYPE_CHECKING:
     from typing import Any, List, Tuple
 
     from libqtile.core.manager import Qtile
 
+
+# Config imports
+def reload(module):
+    if module in sys.modules:
+        importlib.reload(sys.modules[module])
+
+import traverse
+
+reload("groups")
+from groups import groups, keys_group
+
+reload("scratchpad")
+from scratchpad import keys_scratchpad, scratchpad
 
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
@@ -200,13 +201,10 @@ floating_layout = layout.Floating(
     border_normal=border_normal,
     corner_radius=cw,
     float_rules=[
-        Match(title='wlroots - X11-1'),
-        Match(title='wlroots - X11-2'),
-        Match(title='wlroots - WL-1'),
-        Match(title='wlroots - WL-2'),
         Match(title='Open File'),
         Match(title='Unlock Database - KeePassXC'),  # Wayland
         Match(wm_class='Arandr'),
+        Match(wm_class='org.kde.ark'),
         Match(wm_class='confirm'),
         Match(wm_class='dialog'),
         Match(wm_class='download'),
@@ -224,6 +222,7 @@ floating_layout = layout.Floating(
         Match(wm_class='Dragon'),
         Match(wm_class='Dragon-drag-and-drop'),
         Match(wm_class='toolbar'),
+        Match(wm_class='wlroots'),
         Match(wm_class='Xephyr'),
         Match(wm_type='dialog'),
         Match(role='gimp-file-export'),
@@ -505,3 +504,46 @@ auto_fullscreen = True
 focus_on_window_activation = 'smart'
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 groups.append(scratchpad)
+
+
+# Notification server
+reload("notification")
+import notification
+
+notification.Server(
+    background='#888888',
+    foreground='#00ffff',
+    x=50,
+    y=50,
+    width=320,
+    height=100,
+    border='#dddddd',
+    border_width=8,
+    font_size=16,
+    max_windows=1,
+)
+
+keys.extend([EzKey(k, v) for k, v in {
+    'M-<grave>':    notifier.lazy_prev,
+    'M-S-<grave>':  notifier.lazy_next,
+    'C-<space>':    notifier.lazy_close,
+}.items()])
+
+
+
+
+from libqtile.popup import Popup
+p = Popup(qtile, background='#33ff33', foreground='#ff33ff')
+p.text = "hello"
+
+from libqtile.log_utils import logger
+
+def func(*a):
+    if p.win.mapped:
+        p.hide()
+    else:
+        p.unhide()
+        p.draw_text()
+        p.draw()
+
+keys.append(Key([mod], 't', lazy.function(func)))
