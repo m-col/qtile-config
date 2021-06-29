@@ -495,6 +495,32 @@ screens = [
 ]
 
 
+# Notification server
+reload("notification")
+import notification
+
+# Remove defunct callbacks left when reloading the config
+import libqtile.notify
+libqtile.notify.notifier.callbacks.clear()
+
+notifier = notification.Server(
+    background=colours[12],
+    foreground=background,
+    x=50,
+    y=50,
+    width=320,
+    height=100,
+    font_size=18,
+    font='TamzenForPowerline Bold',
+)
+
+my_keys.extend([
+    ([mod],             'grave',    notifier.lazy_prev,     "Previous notification"),
+    ([mod, 'shift'],    'grave',    notifier.lazy_next,     "Next notification"),
+    (['control'],       'space',    notifier.lazy_close,    "Close notification"),
+])
+
+
 # Config variables
 reconfigure_screens = True
 follow_mouse_focus = True
@@ -504,46 +530,3 @@ auto_fullscreen = True
 focus_on_window_activation = 'smart'
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 groups.append(scratchpad)
-
-
-# Notification server
-reload("notification")
-import notification
-
-notification.Server(
-    background='#888888',
-    foreground='#00ffff',
-    x=50,
-    y=50,
-    width=320,
-    height=100,
-    border='#dddddd',
-    border_width=8,
-    font_size=16,
-    max_windows=1,
-)
-
-keys.extend([EzKey(k, v) for k, v in {
-    'M-<grave>':    notifier.lazy_prev,
-    'M-S-<grave>':  notifier.lazy_next,
-    'C-<space>':    notifier.lazy_close,
-}.items()])
-
-
-
-
-from libqtile.popup import Popup
-p = Popup(qtile, background='#33ff33', foreground='#ff33ff')
-p.text = "hello"
-
-from libqtile.log_utils import logger
-
-def func(*a):
-    if p.win.mapped:
-        p.hide()
-    else:
-        p.unhide()
-        p.draw_text()
-        p.draw()
-
-keys.append(Key([mod], 't', lazy.function(func)))
