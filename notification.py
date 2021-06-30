@@ -38,6 +38,12 @@ if TYPE_CHECKING:
         Notification = Any  # type: ignore
 
 
+class ClosedReason:
+    expired = 1
+    dismissed = 2
+    method = 3  # CloseNotification method
+
+
 class Server(configurable.Configurable):
     """
     This class provides a full graphical notification manager for the
@@ -61,7 +67,6 @@ class Server(configurable.Configurable):
         - select screen / follow mouse/keyboard focus
         - critical notifications to replace any visible non-critical notifs immediately?
         - hints: image-path, desktop-entry (for icon)
-        - hints: actions
         - hints: Server parameters set for single notification?
         - hints: progress value e.g. int:value:42 with drawing
 
@@ -114,7 +119,6 @@ class Server(configurable.Configurable):
         ('fullscreen', 'show', 'What to do when in fullscreen: show, hide, or queue.'),
         ('screen', 'focus', 'How to select a screen: focus, mouse, or an int.'),
     ]
-    # 'actions' is (currently) a lie so that Firefox uses this
     capabilities = {'body', 'body-markup', 'actions'}
     # specification: https://developer.gnome.org/notification-spec/
 
@@ -136,7 +140,7 @@ class Server(configurable.Configurable):
         self._make_attr_list('timeout')
         self._make_attr_list('border')
 
-        qtile.call_soon(asyncio.create_task, self.configure())
+        qtile.call_soon(asyncio.create_task, self._configure())
 
     def __getattr__(self, name: str) -> Any:
         """
@@ -155,7 +159,7 @@ class Server(configurable.Configurable):
         if not isinstance(value, (tuple, list)):
             setattr(self, attr, (value,) * 3)
 
-    async def configure(self) -> None:
+    async def _configure(self) -> None:
         """
         This method needs to be called to set up the Server with the Qtile manager and
         create the required popup windows.
@@ -184,7 +188,7 @@ class Server(configurable.Configurable):
         for win in range(self.max_windows):
             popup = Popup(qtile, **popup_config)
             popup.win.process_button_click = self._buttonpress(popup)
-            popup.replaces_id = None
+            popup.notif = None
             self._hidden.append(popup)
             self._positions.append(
                 (
@@ -198,9 +202,11 @@ class Server(configurable.Configurable):
 
     def _buttonpress(self, popup: Popup) -> Callable:
         def _(x: int, y: int, button: int) -> None:
-            # TODO: actions
             if button == 1:
-                self._close(popup)
+                self._act(popup)
+                self._close(popup, reason=ClosedReason.dismissed)
+            if button == 3:
+                self._close(popup, reason=ClosedReason.dismissed)
         return _
 
     def _notify(self, notif: Notification) -> None:
@@ -222,7 +228,7 @@ class Server(configurable.Configurable):
 
         if notif.replaces_id:
             for popup in self._shown:
-                if notif.replaces_id == popup.replaces_id:
+                if notif.replaces_id == popup.notif.replaces_id:
                     self._shown.remove(popup)
                     self._send(notif, popup)
                     self._reposition()
@@ -232,6 +238,10 @@ class Server(configurable.Configurable):
             self._send(notif, self._hidden.pop())
         else:
             self._queue.append(notif)
+
+    def _on_close(self, nid: int) -> None:
+        for popup in self._shown:
+            self._close(popup, nid=nid, reason=ClosedReason.method)
 
     def _unfullscreen(self) -> None:
         """
@@ -265,7 +275,8 @@ class Server(configurable.Configurable):
             urgency = 1
 
         self._current_id += 1
-        popup.id = self._current_id
+        popup.id = self._current_id  # Used for closing the popup
+        popup.notif = notif  # Used for finding the visible popup's notif for actions
         if popup not in self._shown:
             self._shown.append(popup)
         popup.x, popup.y = self._get_coordinates()
@@ -292,7 +303,6 @@ class Server(configurable.Configurable):
         if self.border_width:
             popup.set_border(self.border[urgency])
         popup.draw()
-        popup.replaces_id = notif.replaces_id
         if icon:
             popup.horizontal_padding = self.horizontal_padding
 
@@ -328,7 +338,7 @@ class Server(configurable.Configurable):
             screen = qtile.find_screen(*qtile.mouse_position)
         return x + screen.x, y + screen.y
 
-    def _close(self, popup: Popup, nid: Optional[int] = None) -> None:
+    def _close(self, popup: Popup, nid: Optional[int] = None, reason=1) -> None:
         """
         Close the specified Popup instance.
         """
@@ -344,7 +354,17 @@ class Server(configurable.Configurable):
                 self._send(self._queue.pop(0), popup)
             else:
                 self._hidden.append(popup)
+            notifier._service.NotificationClosed(popup.notif.id, 2 if clicked else 1)
         self._reposition()
+
+    def _act(self, popup: Popup) -> None:
+        """
+        Execute the actions specified by the notification visible on a clicked popup.
+        """
+        # Currently this always invokes default action
+        #actions = {i: l for i, l in zip(notif.actions[:-1:2], notif.actions[1::2])}
+        if popup.notif.actions:
+            notifier._service.ActionInvoked(popup.notif.id, popup.notif.actions[0])
 
     def _reposition(self) -> None:
         for index, shown in enumerate(self._shown):
