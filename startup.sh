@@ -23,7 +23,6 @@ tail -f $FIFO | wob -a bottom \
 
 # TTY session only
 [[ -z "$QTILE_XEPHYR" ]] && {
-    mako &
     keepassxc &
     firefox &
     kanshi &
