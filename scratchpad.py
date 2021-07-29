@@ -38,10 +38,10 @@ conf = {
 
 dropdowns = [
     DropDown("tmux", term + "tmux", height=0.4, **conf),
-    DropDown("irc", term + "irc", x=0.1, y=0.05, width=0.8, height=0.9, **conf),
+    #DropDown("irc", term + "irc", x=0.1, y=0.05, width=0.8, height=0.9, **conf),
     DropDown("ncmpcpp", term + "ncmpcpp", x=0.12, y=0.2, width=0.56, height=0.7, **conf),
     DropDown("python", term + "python", x=0.05, y=0.1, width=0.2, height=0.3, **conf),
-    DropDown("email", mutt, x=0.1, y=0.05, width=0.8, height=0.9, **conf),
+    #DropDown("email", mutt, x=0.1, y=0.05, width=0.8, height=0.9, **conf),
     #DropDown("newsboat", term + "newsboat", x=0.2, y=0.05, width=0.6, height=0.9, **conf),
 ]
 

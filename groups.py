@@ -31,9 +31,9 @@ groups: List[Group] = [
     Group('1', label='term'),
     Group('2', label='term'),
     Group('3', label='term'),
-    Group('q', label='surf', matches=[Match(wm_class='firefox')], layout='max'),
-    Group('w', label='chat'),
-    Group('e', label='toot', matches=[Match(wm_class='hyperspace desktop')]),
+    Group('q', label='surf', matches=[Match(wm_class='firefox')]),
+    Group('w', label='mail', matches=[Match(wm_class='geary'), Match(title='Geary')]),
+    Group('e', label='chat', matches=[Match(title='irc')]),
 ]
 
 
