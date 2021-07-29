@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 from libqtile import configurable, hook, images, pangocffi, qtile
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
-from libqtile.notify import notifier
+from libqtile.notify import notifier, ClosedReason
 from libqtile.popup import Popup
 
 if TYPE_CHECKING:
@@ -36,12 +36,6 @@ if TYPE_CHECKING:
         from libqtile.notify import Notification
     except ImportError:  # no dbus_next
         Notification = Any  # type: ignore
-
-
-class ClosedReason:
-    expired = 1
-    dismissed = 2
-    method = 3  # CloseNotification method
 
 
 class Server(configurable.Configurable):
@@ -187,7 +181,7 @@ class Server(configurable.Configurable):
 
         for win in range(self.max_windows):
             popup = Popup(qtile, **popup_config)
-            popup.win.process_button_click = self._buttonpress(popup)
+            popup.win.process_button_click = self._process_button_click(popup)
             popup.notif = None
             self._hidden.append(popup)
             self._positions.append(
@@ -197,10 +191,12 @@ class Server(configurable.Configurable):
                 )
             )
 
-        await notifier.register(self._notify, Server.capabilities)
+        await notifier.register(
+            self._notify, Server.capabilities, on_close=self._on_close
+        )
         logger.info("Notification server started up successfully")
 
-    def _buttonpress(self, popup: Popup) -> Callable:
+    def _process_button_click(self, popup: Popup) -> Callable:
         def _(x: int, y: int, button: int) -> None:
             if button == 1:
                 self._act(popup)
@@ -354,7 +350,7 @@ class Server(configurable.Configurable):
                 self._send(self._queue.pop(0), popup)
             else:
                 self._hidden.append(popup)
-            notifier._service.NotificationClosed(popup.notif.id, 2 if clicked else 1)
+            notifier._service.NotificationClosed(popup.notif.id, reason)
         self._reposition()
 
     def _act(self, popup: Popup) -> None:
