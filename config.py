@@ -141,13 +141,13 @@ my_keys.extend([
 
     # Backlight control
     ([], 'XF86MonBrightnessUp',
-        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
+        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 5),   "Increase backlight"),
     ([], 'XF86MonBrightnessDown',
-        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
+        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 5), "Decrease backlight"),
     ([], 'F6',
-        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 3),   "Increase backlight"),
+        lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 5),   "Increase backlight"),
     ([], 'F5',
-        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 3), "Decrease backlight"),
+        lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 5), "Decrease backlight"),
 
     # Launchers
     ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
@@ -170,9 +170,7 @@ mouse = [
 
 # Layouts
 border_focus = [colours[13], colours[5]]
-#border_focus = colours[13]
 border_normal = background
-#border_normal = colours[8]
 
 #import qtools.borders
 #qtools.borders.enable('cde')
@@ -186,13 +184,13 @@ layouts = [
         border_width=bw,
         border_focus=border_focus,
         border_normal=border_normal,
-        border_on_single=True,
+        border_on_single=False,
         wrap_focus_columns=False,
         wrap_focus_rows=False,
         margin=inner_gaps,
+        margin_on_single=0,
         corner_radius=cw,
     ),
-    layout.Max(),
 ]
 
 floating_layout = layout.Floating(
@@ -203,6 +201,7 @@ floating_layout = layout.Floating(
     float_rules=[
         Match(title='Open File'),
         Match(title='Unlock Database - KeePassXC'),  # Wayland
+        Match(title='File Operation Progress', wm_class='thunar'),  # Wayland
         Match(wm_class='Arandr'),
         Match(wm_class='org.kde.ark'),
         Match(wm_class='confirm'),
@@ -334,7 +333,7 @@ class MyVolume(widget.Volume):
         self.channel = 'PCM'
         if self.volume == 0:
             self.volume = self.get_volume()
-        self._update_drawer(wob=IS_WAYLAND)
+        self._update_drawer(wob=False)
 
 
 volume = MyVolume(
@@ -435,7 +434,8 @@ def _(_):
     # Keep Static windows on top
     for window in qtile.windows_map.values():
         if isinstance(window, base.Static):
-            window.cmd_bring_to_front()
+            if hasattr(window, "cmd_bring_to_front"):
+                window.cmd_bring_to_front()
 
 
 @hook.subscribe.screen_change
@@ -463,9 +463,9 @@ screens = [
     Screen(
         bottom=bar.Bar(
             [
-                groupboxes[0], cpugraph, prompt,  # Left
+                groupboxes[0], cpugraph, prompt, # Left
                 widget.Spacer(),
-                mpd2,  # Centre
+                mpd2, # Centre
                 widget.Spacer(),
                 systray, bklight, volume, wlan, battery, date, time,  # Right
             ],
@@ -475,19 +475,22 @@ screens = [
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
+        wallpaper="~/pictures/Wallpapers/qtile-wallpaper.png",
     ),
     Screen(
         bottom=bar.Bar(
             [
                 groupboxes[1], cpugraph, prompt,  # Left
                 widget.Spacer(),
-                mpd2,  # Centre
+                mpd2, # Centre
                 widget.Spacer(),
                 bklight, volume, wlan, battery, date, time,  # Right
             ],
             28,
             background=background,
         ),
+        wallpaper="~/pictures/Wallpapers/qtile-wallpaper.png",
+        wallpaper_mode="fill",
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
@@ -496,29 +499,32 @@ screens = [
 
 
 # Notification server
-reload("notification")
-import notification
+if True:
+    reload("notification")
+    import notification
 
 # Remove defunct callbacks left when reloading the config
-import libqtile.notify
-libqtile.notify.notifier.callbacks.clear()
+    import libqtile.notify
+    libqtile.notify.notifier.callbacks.clear()
+    libqtile.notify.notifier.close_callbacks.clear()
 
-notifier = notification.Server(
-    background=colours[12],
-    foreground=background,
-    x=50,
-    y=50,
-    width=320,
-    height=100,
-    font_size=18,
-    font='TamzenForPowerline Bold',
-)
+    notifier = notification.Server(
+        background=colours[12],
+        foreground=background,
+        x=50,
+        y=50,
+        width=320,
+        height=100,
+        font_size=18,
+        font='TamzenForPowerline Bold',
+    )
 
-my_keys.extend([
-    ([mod],             'grave',    notifier.lazy_prev,     "Previous notification"),
-    ([mod, 'shift'],    'grave',    notifier.lazy_next,     "Next notification"),
-    (['control'],       'space',    notifier.lazy_close,    "Close notification"),
-])
+    my_keys.extend([
+        ([mod],             'grave',    notifier.lazy_prev,     "Previous notification"),
+        ([mod, 'shift'],    'grave',    notifier.lazy_next,     "Next notification"),
+        (['control'],       'space',    notifier.lazy_close,    "Close notification"),
+    ])
+
 
 
 # Config variables
