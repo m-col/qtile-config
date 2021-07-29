@@ -7,7 +7,7 @@ QTILE_PID=$PPID
 
 {
     foot --server &
-    swaybg -c '#1B2021' &
+    #swaybg -c '#1B2021' &
 } &> /dev/null
 
 
@@ -22,11 +22,15 @@ tail -f $FIFO | wob -a bottom \
 
 
 # TTY session only
+
+run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
+
 [[ -z "$QTILE_XEPHYR" ]] && {
-    keepassxc &
-    firefox &
-    kanshi &
     wlsunset -t 3100 -T 5700 -l 55.7 -L -3.1 &
+    kanshi &
+    run_if_new keepassxc &
+    run_if_new firefox &
+    run_if_new irc &
 
     sleep 3
     check_systemd
