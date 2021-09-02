@@ -260,6 +260,8 @@ mpd2 = widget.Mpd2(
     font='TamzenForPowerline Bold',
     update_interval=10,
 )
+import libqtile.widget.mpd2widget
+mpd2.mouse_buttons = {v:k for k, v in widget.mpd2widget.keys.items()}
 
 cpugraph = widget.CPUGraph(
     graph_color=colours[12],
