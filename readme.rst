@@ -10,5 +10,5 @@ Screenshot @ 8fe9b96
 
 Graphical notifications @ 7647bc8
 
-.. image:: /screenshots/20200907-5D479D.png
+.. image:: /screenshots/notification.gif
    :alt: Graphical notifications @ 7647bc8
