@@ -47,7 +47,6 @@ if IS_WAYLAND:
 else:
     from x11 import keys_backend, term, wmname  # noqa: F401
 
-
 # Colours
 theme = dict(
     foreground='#CFCCD6',
@@ -98,6 +97,9 @@ my_keys.extend(keys_backend)
 my_keys.extend(keys_group)
 my_keys.extend(keys_scratchpad)
 
+reload("fullscreen_state")
+from fullscreen_state import toggle_fullscreen_state
+
 
 def float_to_front(qtile: Qtile) -> None:
     """ Bring all floating windows of the group to front """
@@ -110,6 +112,7 @@ my_keys.extend([
     # Window management
     ([mod, 'control'],  'q',        lazy.window.kill(),                 "Close window"),
     ([mod],             'f',        lazy.window.toggle_fullscreen(),    "Toggle fullscreen"),
+    ([mod],             'g', lazy.function(toggle_fullscreen_state),    "Toggle fullscreen state"),
     ([mod, 'shift'],    'space',    lazy.window.toggle_floating(),      "Toggle floating"),
     ([mod],             'space',    lazy.function(float_to_front),      "Move floating windows to the front"),
     ([mod],             'j',        lazy.function(traverse.down),       "Traverse down"),
@@ -478,6 +481,7 @@ screens = [
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
         wallpaper="~/pictures/Wallpapers/qtile-wallpaper.png",
+        wallpaper_mode="fill",
     ),
     Screen(
         bottom=bar.Bar(
@@ -500,33 +504,26 @@ screens = [
 ]
 
 
-# Notification server
-if True:
-    reload("notification")
-    import notification
+# Graphical notifications
+reload("graphical_notifications")
+from graphical_notifications import Notifier
 
-# Remove defunct callbacks left when reloading the config
-    import libqtile.notify
-    libqtile.notify.notifier.callbacks.clear()
-    libqtile.notify.notifier.close_callbacks.clear()
+notifier = Notifier(
+    background=colours[12],
+    foreground=background,
+    x=50,
+    y=50,
+    width=320,
+    height=100,
+    font_size=18,
+    font='TamzenForPowerline Bold',
+)
 
-    notifier = notification.Server(
-        background=colours[12],
-        foreground=background,
-        x=50,
-        y=50,
-        width=320,
-        height=100,
-        font_size=18,
-        font='TamzenForPowerline Bold',
-    )
-
-    my_keys.extend([
-        ([mod],             'grave',    notifier.lazy_prev,     "Previous notification"),
-        ([mod, 'shift'],    'grave',    notifier.lazy_next,     "Next notification"),
-        (['control'],       'space',    notifier.lazy_close,    "Close notification"),
-    ])
-
+my_keys.extend([
+    ([mod],             'grave',    lazy.function(notifier.prev),     "Previous notification"),
+    ([mod, 'shift'],    'grave',    lazy.function(notifier.next),     "Next notification"),
+    (['control'],       'space',    lazy.function(notifier.close),    "Close notification"),
+])
 
 
 # Config variables
