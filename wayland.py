@@ -20,12 +20,12 @@ keys_backend = []
 
 # Keys to change VT
 keys_backend.extend([
-    ([mod], 'F1',     lazy.change_vt(1),    "Change to VT 1"),
-    ([mod], 'F2',     lazy.change_vt(2),    "Change to VT 2"),
-    ([mod], 'F3',     lazy.change_vt(3),    "Change to VT 3"),
-    ([mod], 'F4',     lazy.change_vt(4),    "Change to VT 4"),
-    ([mod], 'F5',     lazy.change_vt(5),    "Change to VT 5"),
-    ([mod], 'F6',     lazy.change_vt(6),    "Change to VT 6"),
+    ([mod], 'F1',     lazy.core.change_vt(1),    "Change to VT 1"),
+    ([mod], 'F2',     lazy.core.change_vt(2),    "Change to VT 2"),
+    ([mod], 'F3',     lazy.core.change_vt(3),    "Change to VT 3"),
+    ([mod], 'F4',     lazy.core.change_vt(4),    "Change to VT 4"),
+    ([mod], 'F5',     lazy.core.change_vt(5),    "Change to VT 5"),
+    ([mod], 'F6',     lazy.core.change_vt(6),    "Change to VT 6"),
 ])
 
 
