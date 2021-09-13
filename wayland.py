@@ -53,11 +53,6 @@ def _(window):
         state = window.surface.toplevel._ptr.current
         if 0 < state.max_width < 1920:
             window.floating = True
-        else:
-            # Just incase I find something new I want to auto-float
-            logger.warning(
-                (window.name, window.get_wm_class(), (state.min_width, state.max_width))
-            )
 
 
 @hook.subscribe.startup_once
