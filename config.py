@@ -129,9 +129,6 @@ my_keys.extend([
     ([mod, alt],        'l',        lazy.layout.grow_right(),           "Grow right"),
     ([mod, 'shift'],    'r',        lazy.reload_config(),               "Reload the config"),
     ([mod, 'control'],  'r',        lazy.restart(),                     "Restart Qtile"),
-    ([mod],             'Tab',      lazy.next_layout(),                 "Next layout"),
-    ([mod, 'control'],  'h',        lazy.window.toggle_minimize(),      "Minimise window"),
-    ([mod],             's',        lazy.window.static(),               "Make window static"),
     ([mod, 'control'],  'Escape',   lazy.shutdown(),                    "Shutdown Qtile"),
 
     # Volume control - MyVolume widget is defined further down
@@ -184,14 +181,14 @@ border_normal = background
 layouts = [
     layout.Columns(
         insert_position=1,
-        border_width=bw,
+        border_width=12,
         border_focus=border_focus,
         border_normal=border_normal,
-        border_on_single=False,
+        border_on_single=True,
         wrap_focus_columns=False,
         wrap_focus_rows=False,
-        margin=inner_gaps,
-        margin_on_single=0,
+        margin=0,
+        #margin_on_single=0,
         corner_radius=cw,
     ),
 ]
@@ -201,6 +198,8 @@ floating_layout = layout.Floating(
     border_focus=border_focus,
     border_normal=border_normal,
     corner_radius=cw,
+    #fullscreen_border_width=12,
+    fullscreen_border_width=0,
     float_rules=[
         Match(title='Open File'),
         Match(title='Unlock Database - KeePassXC'),  # Wayland
@@ -349,10 +348,7 @@ volume = MyVolume(
     update_interval=60,
 )
 
-if IS_WAYLAND:
-    systray = widget.TextBox('')
-else:
-    systray = widget.Systray(padding=20)
+systray = widget.StatusNotifier(padding=20)
 
 wlan = widget.Wlan(
     format='',

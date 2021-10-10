@@ -40,7 +40,8 @@ try:
     from libqtile.backend.wayland import InputConfig
     wayland_libinput_config = {
             "type:pointer": InputConfig(pointer_accel=-0.7),
-            "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(drag=True, tap=True, pointer_accel=0.4),
+            "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(drag=True,
+                tap=True, swt=False, pointer_accel=0.4),
     }
 except ImportError:
     wayland_libinput_config = None
