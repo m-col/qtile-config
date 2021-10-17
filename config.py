@@ -137,20 +137,20 @@ my_keys.extend([
 
     # Volume control - MyVolume widget is defined further down
     ([], 'XF86AudioMute',         lazy.widget['myvolume'].mute(),         "Mute audio"),
-    ([], 'F10',                   lazy.widget['myvolume'].mute(),         "Mute audio"),
+    ([mod], 'F10',                   lazy.widget['myvolume'].mute(),         "Mute audio"),
     ([], 'XF86AudioRaiseVolume',  lazy.widget['myvolume'].increase_vol(), "Increase volume"),
-    ([], 'F12',                   lazy.widget['myvolume'].increase_vol(), "Increase volume"),
+    ([mod], 'F12',                   lazy.widget['myvolume'].increase_vol(), "Increase volume"),
     ([], 'XF86AudioLowerVolume',  lazy.widget['myvolume'].decrease_vol(), "Decrease volume"),
-    ([], 'F11',                   lazy.widget['myvolume'].decrease_vol(), "Decrease volume"),
+    ([mod], 'F11',                   lazy.widget['myvolume'].decrease_vol(), "Decrease volume"),
 
     # Backlight control
     ([], 'XF86MonBrightnessUp',
         lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 5),   "Increase backlight"),
     ([], 'XF86MonBrightnessDown',
         lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 5), "Decrease backlight"),
-    ([], 'F6',
+    ([mod], 'F6',
         lazy.widget['backlight'].change_backlight(ChangeDirection.UP, 5),   "Increase backlight"),
-    ([], 'F5',
+    ([mod], 'F5',
         lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 5), "Decrease backlight"),
 
     # Launchers
