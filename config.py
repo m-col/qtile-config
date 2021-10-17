@@ -208,7 +208,9 @@ floating_layout = layout.Floating(
         Match(title='Open File'),
         Match(title='Unlock Database - KeePassXC'),  # Wayland
         Match(title='File Operation Progress', wm_class='thunar'),  # Wayland
+        Match(title='Firefox — Sharing Indicator'),  # Wayland
         Match(wm_class='Arandr'),
+        Match(wm_class='org.gnome.clocks'),
         Match(wm_class='org.kde.ark'),
         Match(wm_class='confirm'),
         Match(wm_class='dialog'),
@@ -325,22 +327,18 @@ class MyVolume(widget.Volume):
                 f.write(str(self.volume) + "\n")
 
     def cmd_increase_vol(self):
-        subprocess.call('amixer set PCM 4%+'.split())
+        subprocess.call('amixer -c PCH set PCM 4%+'.split())
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_decrease_vol(self):
-        subprocess.call('amixer set PCM 4%-'.split())
+        subprocess.call('amixer -c PCH set PCM 4%-'.split())
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_mute(self):
-        subprocess.call('amixer set Master toggle'.split())
-        self.channel = 'Master'
+        subprocess.call('amixer -c PCH set PCM toggle'.split())
         self.volume = self.get_volume()
-        self.channel = 'PCM'
-        if self.volume == 0:
-            self.volume = self.get_volume()
         self._update_drawer(wob=False)
 
 
@@ -350,6 +348,8 @@ volume = MyVolume(
     font='Font Awesome 5 Free',
     foreground=colours[4],
     update_interval=60,
+    cardid="PCH",
+    device=None,
 )
 
 systray = widget.StatusNotifier(padding=20)
@@ -365,10 +365,11 @@ wlan = widget.Wlan(
 class MyBattery(Battery):
     def build_string(self, status):
         if self.layout is not None:
+            self.layout.colour = self.foreground
             if status.state == BatteryState.DISCHARGING and status.percent < self.low_percentage:
-                self.layout.colour = self.low_foreground
+                self.background = self.low_background
             else:
-                self.layout.colour = self.foreground
+                self.background = self.normal_background
         if status.state == BatteryState.DISCHARGING:
             if status.percent > 0.75:
                 char = ''
@@ -399,7 +400,7 @@ class MyBattery(Battery):
 
 battery = MyBattery(
     format='{char}',
-    low_foreground=colours[1],
+    low_background=colours[1],
     show_short_text=False,
     low_percentage=0.12,
     foreground=colours[6],
@@ -522,9 +523,7 @@ notifier = Notifier(
 my_keys.extend([
     ([mod],             'grave',    lazy.function(notifier.prev),     "Previous notification"),
     ([mod, 'shift'],    'grave',    lazy.function(notifier.next),     "Next notification"),
-    (['control'],       'space',    lazy.function(notifier.close),    "Close notification"),
 ])
-
 
 # Config variables
 reconfigure_screens = True
