@@ -38,6 +38,9 @@ from groups import groups, keys_group
 reload("scratchpad")
 from scratchpad import keys_scratchpad, scratchpad
 
+reload("power_menu")
+from power_menu import keys_power_menu
+
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
@@ -96,6 +99,7 @@ my_keys: List[Tuple[List[str], str, Any, str]] = []
 my_keys.extend(keys_backend)
 my_keys.extend(keys_group)
 my_keys.extend(keys_scratchpad)
+my_keys.extend(keys_power_menu)
 
 reload("fullscreen_state")
 from fullscreen_state import toggle_fullscreen_state
