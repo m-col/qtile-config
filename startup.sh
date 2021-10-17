@@ -32,6 +32,9 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
     run_if_new firefox &
     run_if_new irc &
 
+    # For screensharing
+    systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
     sleep 3
     check_systemd
 } &> /dev/null
