@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from libqtile import bar, hook, layout, qtile, widget
 from libqtile.backend import base
-from libqtile.config import Drag, Key, Match, Screen
+from libqtile.config import Click, Drag, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.widget.backlight import ChangeDirection
 from libqtile.widget.battery import Battery, BatteryState
@@ -157,7 +157,6 @@ my_keys.extend([
     ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
     ([mod],             'Return',   lazy.spawn(term),                           "Spawn terminal"),
     ([mod, 'shift'],    'f',        lazy.spawn("firefox"),                      "Spawn Firefox"),
-    ([mod, 'control'],  'f',        lazy.spawn("tor-browser --allow-remote"),   "Spawn Tor Browser"),
     ([],                'Print',    lazy.spawn("screenshot copy"),              "Screenshot to clipboard"),
     (['shift'],         'Print',    lazy.spawn('screenshot'),                   "Screenshot to file"),
     ([mod],             'p',        lazy.spawn('get_password_rofi'),            "Keepass passwords"),
@@ -167,6 +166,7 @@ my_keys.extend([
 
 # Mouse control
 mouse = [
+    Click([mod], "Button2",     lazy.window.kill()),
     Drag([mod], "Button1",      lazy.window.set_position_floating(), start=lazy.window.get_position()),
     Drag([mod, alt], "Button1", lazy.window.set_size_floating(), start=lazy.window.get_size()),
 ]
