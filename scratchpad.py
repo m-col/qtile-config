@@ -44,7 +44,7 @@ dropdowns = [
 # Keybindings to open each DropDown
 keys_scratchpad = [
     ([mod, 'shift'], 'Return', lazy.group['scratchpad'].dropdown_toggle('tmux'), "Toggle tmux scratchpad"),
-    ([mod, 'control'], 'e', lazy.group['scratchpad'].dropdown_toggle('ncmpcpp'), "Toggle ncmpcpp scratchpad"),
+    ([mod, 'control'], 'm', lazy.group['scratchpad'].dropdown_toggle('ncmpcpp'), "Toggle ncmpcpp scratchpad"),
     ([mod], 'c', lazy.group['scratchpad'].dropdown_toggle('python'), "Toggle python scratchpad"),
 ]
 
