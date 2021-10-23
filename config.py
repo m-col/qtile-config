@@ -161,6 +161,7 @@ my_keys.extend([
     (['shift'],         'Print',    lazy.spawn('screenshot'),                   "Screenshot to file"),
     ([mod],             'p',        lazy.spawn('get_password_rofi'),            "Keepass passwords"),
     ([mod],             'i',        lazy.spawn('systemctl suspend -i'),         "Suspend system"),
+    ([], 'Pause',                   lazy.spawn('mpc toggle'),                   "Play/unpause music"),
 ])
 
 
@@ -327,12 +328,12 @@ class MyVolume(widget.Volume):
                 f.write(str(self.volume) + "\n")
 
     def cmd_increase_vol(self):
-        subprocess.call('amixer -c PCH set PCM 4%+'.split())
+        subprocess.call('amixer -c PCH set PCM 3%+'.split())
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_decrease_vol(self):
-        subprocess.call('amixer -c PCH set PCM 4%-'.split())
+        subprocess.call('amixer -c PCH set PCM 3%-'.split())
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
