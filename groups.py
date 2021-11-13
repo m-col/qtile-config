@@ -46,18 +46,18 @@ def _go_to_group(name: str) -> Callable:
     """
     def _inner(qtile: Qtile) -> None:
         if len(qtile.screens) == 1:
-            qtile.groups_map[name].cmd_toscreen()
+            qtile.groups_map[name].cmd_toscreen(toggle=True)
             return
 
         old = qtile.current_screen.group.name
         if name in '123':
             qtile.focus_screen(0)
             if old in '123' or qtile.current_screen.group.name != name:
-                qtile.groups_map[name].cmd_toscreen()
+                qtile.groups_map[name].cmd_toscreen(toggle=True)
         else:
             qtile.focus_screen(1)
             if old in 'qwe' or qtile.current_screen.group.name != name:
-                qtile.groups_map[name].cmd_toscreen()
+                qtile.groups_map[name].cmd_toscreen(toggle=True)
 
     return _inner
 
