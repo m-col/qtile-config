@@ -24,24 +24,16 @@ keys_backend.extend([
     ([mod], 'F2',     lazy.core.change_vt(2),    "Change to VT 2"),
     ([mod], 'F3',     lazy.core.change_vt(3),    "Change to VT 3"),
     ([mod], 'F4',     lazy.core.change_vt(4),    "Change to VT 4"),
-    ([mod], 'F5',     lazy.core.change_vt(5),    "Change to VT 5"),
-    ([mod], 'F6',     lazy.core.change_vt(6),    "Change to VT 6"),
 ])
-
-
-# Keys to run Wayland-only launchers
-#keys_backend.extend([
-#    ([mod], 'd', lazy.spawn('wofi --gtk-dark --show run'), "wofi: run"),
-#])
 
 
 # Configure libinput devices
 try:
     from libqtile.backend.wayland import InputConfig
     wayland_libinput_config = {
-            "type:pointer": InputConfig(pointer_accel=-0.7),
+            "type:pointer": InputConfig(pointer_accel=-0.9),
             "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(drag=True,
-                tap=True, swt=False, pointer_accel=0.4),
+                tap=True, swt=False, pointer_accel=0.3),
     }
 except ImportError:
     wayland_libinput_config = None
