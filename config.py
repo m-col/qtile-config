@@ -153,6 +153,12 @@ my_keys.extend([
     ([mod], 'F5',
         lazy.widget['backlight'].change_backlight(ChangeDirection.DOWN, 5), "Decrease backlight"),
 
+    # Music control
+    ([mod], 'bracketright',
+        lazy.widget['mpd2'].function(lambda w: w.button_press(0, 0, 5)),   "Next song"),
+    ([mod], 'bracketleft',
+        lazy.widget['mpd2'].function(lambda w: w.button_press(0, 0, 4)),   "Previous song"),
+
     # Launchers
     ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
     ([mod],             'Return',   lazy.spawn(term),                           "Spawn terminal"),
