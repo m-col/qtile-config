@@ -28,7 +28,6 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
 [[ -z "$QTILE_XEPHYR" ]] && {
     wlsunset -t 2500 -T 5700 -l 55.7 -L -3.1 &
     kanshi &
-    run_if_new keepassxc &
     run_if_new firefox &
     run_if_new irc &
 

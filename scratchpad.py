@@ -30,7 +30,7 @@ else:
 
 conf = {
     "warp_pointer": False,
-    "on_focus_lost_hide": True,
+    "on_focus_lost_hide": False,
     "opacity": 1,
 }
 
