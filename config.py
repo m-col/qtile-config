@@ -160,7 +160,7 @@ my_keys.extend([
         lazy.widget['mpd2'].function(lambda w: w.button_press(0, 0, 4)),   "Previous song"),
 
     # Launchers
-    ([mod],             'd',        lazy.spawncmd(),                            "Spawn with Prompt"),
+    ([mod],             'd',        lazy.spawncmd(shell=False),                 "Spawn with Prompt"),
     ([mod],             'Return',   lazy.spawn(term),                           "Spawn terminal"),
     ([mod, 'shift'],    'f',        lazy.spawn("firefox"),                      "Spawn Firefox"),
     ([],                'Print',    lazy.spawn("screenshot copy"),              "Screenshot to clipboard"),
@@ -275,7 +275,6 @@ mpd2 = widget.Mpd2(
     font='TamzenForPowerline Bold',
     update_interval=10,
 )
-import libqtile.widget.mpd2widget
 mpd2.mouse_buttons = {v:k for k, v in widget.mpd2widget.keys.items()}
 
 cpugraph = widget.CPUGraph(
@@ -359,7 +358,10 @@ volume = MyVolume(
     device=None,
 )
 
-systray = widget.StatusNotifier(padding=20)
+if IS_WAYLAND:
+    systray = widget.StatusNotifier(padding=20)
+else:
+    systray = widget.Systray(padding=20, icon_size=24)
 
 wlan = widget.Wlan(
     format='',
