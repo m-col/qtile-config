@@ -180,8 +180,8 @@ mouse = [
 
 
 # Layouts
-border_focus = [colours[13], colours[5]]
-border_normal = background
+border_focus = [colours[5]]
+border_normal = '001122'
 
 #import qtools.borders
 #qtools.borders.enable('cde')
@@ -192,7 +192,7 @@ border_normal = background
 layouts = [
     layout.Columns(
         insert_position=1,
-        border_width=12,
+        border_width=3,
         border_focus=border_focus,
         border_normal=border_normal,
         border_on_single=True,
@@ -205,7 +205,7 @@ layouts = [
 ]
 
 floating_layout = layout.Floating(
-    border_width=bw,
+    border_width=3,
     border_focus=border_focus,
     border_normal=border_normal,
     corner_radius=cw,
@@ -474,6 +474,9 @@ prompt = widget.Prompt(
     bell_style='visual',
 )
 
+bar_border_width = 2
+bar_border_color = '334455'
+
 screens = [
     Screen(
         bottom=bar.Bar(
@@ -486,6 +489,8 @@ screens = [
             ],
             28,
             background=background,
+            border_width=[bar_border_width, 0, bar_border_width, 1],
+            border_color=[bar_border_color, '000000', bar_border_color, '000000'],
         ),
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
