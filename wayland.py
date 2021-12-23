@@ -27,16 +27,23 @@ keys_backend.extend([
 ])
 
 
-# Configure libinput devices
+# Configure input devices
 try:
     from libqtile.backend.wayland import InputConfig
-    wayland_libinput_config = {
-            "type:pointer": InputConfig(pointer_accel=-0.9),
-            "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(drag=True,
-                tap=True, swt=False, pointer_accel=0.3),
+    wl_input_rules = {
+        "type:keyboard": InputConfig(
+            kb_options="caps:swapescape,altwin:swap_alt_win",
+            kb_layout="gb",
+            kb_repeat_rate=35,
+            kb_repeat_delay=250,
+        ),
+        "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
+            drag=True, tap=True, dwt=False, pointer_accel=0.3
+        ),
+        "type:pointer": InputConfig(pointer_accel=-0.9),
     }
 except ImportError:
-    wayland_libinput_config = None
+    wl_input_rules = None
 
 
 @hook.subscribe.client_new
