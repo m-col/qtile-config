@@ -30,10 +30,17 @@ def reload(module):
     if module in sys.modules:
         importlib.reload(sys.modules[module])
 
+
 import traverse
 
-reload("groups")
-from groups import groups, keys_group
+use_tags = False
+
+if use_tags:
+    reload("tags")
+    from tags import groups, keys_group
+else:
+    reload("groups")
+    from groups import groups, keys_group
 
 reload("scratchpad")
 from scratchpad import keys_scratchpad, scratchpad
