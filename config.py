@@ -228,7 +228,8 @@ mouse = [
     Drag(
         [mod],
         "Button1",
-        lazy.window.set_position_floating(),
+        #lazy.window.set_position_floating(),
+        move_snap_window(snap_dist=20),
         start=lazy.window.get_position(),
     ),
     Drag(
@@ -589,9 +590,9 @@ screens = [
                 time,  # Right
             ],
             28,
-            background=background,
+            background=background + "00",
         ),
-        wallpaper="~/pictures/Wallpapers/qtile-wallpaper.png",
+        wallpaper="~/pictures/Wallpapers/q_triangles2.png",
         wallpaper_mode="fill",
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
@@ -631,8 +632,3 @@ auto_fullscreen = True
 focus_on_window_activation = "smart"
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 groups.append(scratchpad)
-
-
-# keys.extend([
-#    Key([], "b", lazy.spawn("rofi -show"), swallow=False),
-# ])
