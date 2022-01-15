@@ -228,8 +228,8 @@ mouse = [
     Drag(
         [mod],
         "Button1",
-        #lazy.window.set_position_floating(),
-        move_snap_window(snap_dist=20),
+        lazy.window.set_position_floating(),
+        #move_snap_window(snap_dist=20),
         start=lazy.window.get_position(),
     ),
     Drag(
