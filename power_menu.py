@@ -1,8 +1,4 @@
-from qtile_extras.popup.toolkit import (
-    PopupRelativeLayout,
-    PopupImage,
-    PopupText
-)
+from qtile_extras.popup.toolkit import PopupRelativeLayout, PopupImage, PopupText
 
 from libqtile.lazy import lazy
 
@@ -15,10 +11,7 @@ def show_power_menu(qtile):
             pos_y=0.1,
             width=0.1,
             height=0.5,
-            mouse_callbacks={
-                "Button1":
-                lazy.spawn("swaylock")
-            }
+            mouse_callbacks={"Button1": lazy.spawn("swaylock")},
         ),
         PopupImage(
             filename="~/pictures/icons/sleep.svg",
@@ -26,10 +19,7 @@ def show_power_menu(qtile):
             pos_y=0.1,
             width=0.1,
             height=0.5,
-            mouse_callbacks={
-                "Button1":
-                lazy.spawn("systemctl suspend", shell=True)
-            }
+            mouse_callbacks={"Button1": lazy.spawn("systemctl suspend", shell=True)},
         ),
         PopupImage(
             filename="~/pictures/icons/shutdown.svg",
@@ -38,26 +28,13 @@ def show_power_menu(qtile):
             width=0.1,
             height=0.5,
             highlight="A00000",
-            mouse_callbacks={
-                "Button1":
-                lazy.spawn("backup-home-and-poweroff")
-            }
+            mouse_callbacks={"Button1": lazy.spawn("backup-home-and-poweroff")},
         ),
         PopupText(
-            text="Lock",
-            pos_x=0.1,
-            pos_y=0.7,
-            width=0.2,
-            height=0.2,
-            h_align="center"
+            text="Lock", pos_x=0.1, pos_y=0.7, width=0.2, height=0.2, h_align="center"
         ),
         PopupText(
-            text="Sleep",
-            pos_x=0.4,
-            pos_y=0.7,
-            width=0.2,
-            height=0.2,
-            h_align="center"
+            text="Sleep", pos_x=0.4, pos_y=0.7, width=0.2, height=0.2, h_align="center"
         ),
         PopupText(
             text="Shutdown",
@@ -65,7 +42,7 @@ def show_power_menu(qtile):
             pos_y=0.7,
             width=0.2,
             height=0.2,
-            h_align="center"
+            h_align="center",
         ),
     ]
     PopupRelativeLayout(
@@ -77,6 +54,7 @@ def show_power_menu(qtile):
         initial_focus=2,
     ).show(centered=True)
 
+
 keys_power_menu = [
-    ([], 'XF86PowerOff', lazy.function(show_power_menu), "Display the power menu.")
+    ([], "XF86PowerOff", lazy.function(show_power_menu), "Display the power menu.")
 ]

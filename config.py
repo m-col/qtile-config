@@ -20,7 +20,7 @@ from libqtile.widget.backlight import ChangeDirection
 from libqtile.widget.battery import Battery, BatteryState
 
 if TYPE_CHECKING:
-    from typing import Any, List, Tuple
+    from typing import Any
 
     from libqtile.core.manager import Qtile
 
@@ -102,7 +102,7 @@ else:
     alt = "mod1"
 
 # My keybindings - they are converted at the bottom of this file
-my_keys: List[Tuple[List[str], str, Any, str]] = []
+my_keys: list[tuple[list[str], str, Any, str]] = []
 my_keys.extend(keys_backend)
 my_keys.extend(keys_group)
 my_keys.extend(keys_scratchpad)
@@ -203,8 +203,9 @@ my_keys.extend(
             lazy.widget["mpd2"].function(lambda w: w.button_press(0, 0, 4)),
             "Previous song",
         ),
+        ([], "Pause", lazy.spawn("mpc toggle"), "Play/unpause music"),
         # Launchers
-        ([mod], "d", lazy.spawncmd(shell=False), "Spawn with Prompt"),
+        ([mod], "d", lazy.spawn("rofi -show run"), "Spawn with rofi"),
         ([mod], "Return", lazy.spawn(term), "Spawn terminal"),
         ([mod, "shift"], "f", lazy.spawn("firefox"), "Spawn Firefox"),
         (
@@ -217,7 +218,6 @@ my_keys.extend(
         (["shift"], "Print", lazy.spawn("screenshot"), "Screenshot to file"),
         ([mod], "p", lazy.spawn("get_password_rofi"), "Keepass passwords"),
         ([mod], "i", lazy.spawn("systemctl suspend -i"), "Suspend system"),
-        ([], "Pause", lazy.spawn("mpc toggle"), "Play/unpause music"),
     ]
 )
 
@@ -229,7 +229,7 @@ mouse = [
         [mod],
         "Button1",
         lazy.window.set_position_floating(),
-        #move_snap_window(snap_dist=20),
+        # move_snap_window(snap_dist=20),
         start=lazy.window.get_position(),
     ),
     Drag(
@@ -244,12 +244,6 @@ mouse = [
 # Layouts
 border_focus = [colours[5]]
 border_normal = "001122"
-
-# import qtools.borders
-# qtools.borders.enable('cde')
-# border_focus = [border_focus, colours[5]]
-# border_normal = [colours[0], colours[8]]
-
 
 layouts = [
     layout.Columns(
@@ -274,10 +268,10 @@ floating_layout = layout.Floating(
     fullscreen_border_width=0,
     float_rules=[
         Match(title="Open File"),
-        Match(title="Unlock Database - KeePassXC"),  # Wayland
-        Match(title="File Operation Progress", wm_class="thunar"),  # Wayland
-        Match(wm_class="thunar"),  # Wayland
-        Match(title="Firefox — Sharing Indicator"),  # Wayland
+        Match(title="Unlock Database - KeePassXC"),
+        Match(title="File Operation Progress", wm_class="thunar"),
+        Match(wm_class="thunar"),
+        Match(title="Firefox — Sharing Indicator"),
         Match(wm_class="Arandr"),
         Match(wm_class="org.gnome.clocks"),
         Match(wm_class="org.kde.ark"),
@@ -302,8 +296,9 @@ floating_layout = layout.Floating(
         Match(wm_class="Xephyr"),
         Match(wm_type="dialog"),
         Match(role="gimp-file-export"),
-        Match(func=lambda c: c.has_fixed_size()),
+        Match(func=base.Window.has_fixed_size),
         Match(func=lambda c: bool(c.is_transient_for())),
+        Match(title="KDE Connect Daemon"),
     ],
 )
 
@@ -336,29 +331,6 @@ mpd2 = widget.Mpd2(
     idle_format="",
     font="TamzenForPowerline Bold",
     update_interval=10,
-)
-mpd2.mouse_buttons = {v: k for k, v in widget.mpd2widget.keys.items()}
-
-cpugraph = widget.CPUGraph(
-    graph_color=colours[12],
-    fill_color=colour_unfocussed,
-    border_width=0,
-    margin_x=10,
-    margin_y=4,
-    samples=50,
-    line_width=4,
-    width=50 if IS_XEPHYR else 200,
-    type="box",
-    frequency=1,
-)
-
-bklight = widget.Backlight(
-    backlight_name=os.listdir("/sys/class/backlight")[0],
-    step=1,
-    update_interval=None,
-    format="",
-    change_command=None,
-    foreground=colours[3],
 )
 
 
@@ -410,6 +382,15 @@ class MyVolume(widget.Volume):
         self._update_drawer(wob=False)
 
 
+bklight = widget.Backlight(
+    backlight_name=os.listdir("/sys/class/backlight")[0],
+    step=1,
+    update_interval=None,
+    format="",
+    change_command=None,
+    foreground=colours[3],
+)
+
 volume = MyVolume(
     fontsize=18,
     channel="PCM",
@@ -434,6 +415,11 @@ wlan = widget.Wlan(
 
 
 class MyBattery(Battery):
+    """
+    This is basically the Battery widget except it uses some icons, and if you click it
+    it will show the percentage numerically for 1 second.
+    """
+
     def build_string(self, status):
         if self.layout is not None:
             self.layout.colour = self.foreground
@@ -491,6 +477,7 @@ date = widget.Clock(
     foreground=colours[7],
     update_interval=60,
 )
+
 time = widget.Clock(
     fontsize=20,
     font="TamzenForPowerline Medium",
@@ -512,34 +499,16 @@ def _():
         groupboxes[0].visible_groups = ["1", "2", "3", "q", "w", "e"]
 
 
-@hook.subscribe.client_focus
-def _(_):
-    # Keep Static windows on top
-    for window in qtile.windows_map.values():
-        if isinstance(window, base.Static):
-            if hasattr(window, "cmd_bring_to_front"):
-                window.cmd_bring_to_front()
+@hook.subscribe.screens_reconfigured
+def _():
+    # Reconfigure GroupBox visible groups
+    if len(qtile.screens) > 1:
+        groupboxes[0].visible_groups = ["1", "2", "3"]
+    else:
+        groupboxes[0].visible_groups = ["1", "2", "3", "q", "w", "e"]
+    if hasattr(groupboxes[0], "bar"):
+        groupboxes[0].bar.draw()
 
-
-# @hook.subscribe.screens_reconfigured
-# async def _():
-#    # Reconfigure GroupBox visible groups
-#    if len(qtile.screens) > 1:
-#        groupboxes[0].visible_groups = ['1', '2', '3']
-#    else:
-#        groupboxes[0].visible_groups = ['1', '2', '3', 'q', 'w', 'e']
-#    if hasattr(groupboxes[0], 'bar'):
-#        groupboxes[0].bar.draw()
-
-
-prompt = widget.Prompt(
-    fontsize=20,
-    font="TamzenForPowerline Medium",
-    cursor_color=foreground,
-    visual_bell_color=foreground,
-    background=colours[5],
-    bell_style="visual",
-)
 
 bar_border_width = [0, 3, 0, 3]
 bar_border_color = ["000000", colours[5], "000000", colours[5]]
@@ -549,22 +518,18 @@ screens = [
         bottom=bar.Bar(
             [
                 groupboxes[0],
-                # cpugraph,
-                prompt,  # Left
-                # widget.TaskList(icon_only=True),
                 widget.Spacer(),
-                mpd2,  # Centre
+                mpd2,
                 widget.Spacer(),
                 systray,
-                bklight,
                 volume,
+                bklight,
                 wlan,
                 battery,
                 date,
-                time,  # Right
+                time,
             ],
             28,
-            # background=background + '33',
             background=background + "00",
         ),
         top=bar.Gap(outer_gaps),
@@ -577,17 +542,15 @@ screens = [
         bottom=bar.Bar(
             [
                 groupboxes[1],
-                # cpugraph,
-                prompt,  # Left
                 widget.Spacer(),
-                mpd2,  # Centre
+                mpd2,
                 widget.Spacer(),
-                bklight,
                 volume,
+                bklight,
                 wlan,
                 battery,
                 date,
-                time,  # Right
+                time,
             ],
             28,
             background=background + "00",
@@ -601,34 +564,21 @@ screens = [
 ]
 
 
-# Graphical notifications
-reload("graphical_notifications")
-from graphical_notifications import Notifier
+@hook.subscribe.client_focus
+def _(_):
+    # Keep Static windows on top
+    for window in qtile.windows_map.values():
+        if isinstance(window, base.Static):
+            if hasattr(window, "cmd_bring_to_front"):
+                window.cmd_bring_to_front()
 
-notifier = Notifier(
-    background=colours[12],
-    foreground=background,
-    x=50,
-    y=50,
-    width=320,
-    height=100,
-    font_size=18,
-    font="TamzenForPowerline Bold",
-)
 
-my_keys.extend(
-    [
-        ([mod], "grave", lazy.function(notifier.prev), "Previous notification"),
-        ([mod, "shift"], "grave", lazy.function(notifier.next), "Next notification"),
-    ]
-)
-
-# Config variables
 reconfigure_screens = True
 follow_mouse_focus = True
 bring_front_click = True
 cursor_warp = False
 auto_fullscreen = True
 focus_on_window_activation = "smart"
+
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 groups.append(scratchpad)

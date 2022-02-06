@@ -13,7 +13,7 @@ from libqtile import qtile
 from libqtile.config import DropDown, ScratchPad
 from libqtile.lazy import lazy
 
-HOME: str = os.path.expanduser('~')
+HOME: str = os.path.expanduser("~")
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 mod = "mod1" if IS_XEPHYR else "mod4"
@@ -36,16 +36,33 @@ conf = {
 
 dropdowns = [
     DropDown("tmux", term + "tmux", height=0.4, **conf),
-    DropDown("ncmpcpp", term + "ncmpcpp", x=0.12, y=0.2, width=0.56, height=0.7, **conf),
+    DropDown(
+        "ncmpcpp", term + "ncmpcpp", x=0.12, y=0.2, width=0.56, height=0.7, **conf
+    ),
     DropDown("python", term + "python", x=0.05, y=0.1, width=0.2, height=0.3, **conf),
 ]
 
 
 # Keybindings to open each DropDown
 keys_scratchpad = [
-    ([mod, 'shift'], 'Return', lazy.group['scratchpad'].dropdown_toggle('tmux'), "Toggle tmux scratchpad"),
-    ([mod, 'control'], 'm', lazy.group['scratchpad'].dropdown_toggle('ncmpcpp'), "Toggle ncmpcpp scratchpad"),
-    ([mod], 'c', lazy.group['scratchpad'].dropdown_toggle('python'), "Toggle python scratchpad"),
+    (
+        [mod, "shift"],
+        "Return",
+        lazy.group["scratchpad"].dropdown_toggle("tmux"),
+        "Toggle tmux scratchpad",
+    ),
+    (
+        [mod, "control"],
+        "m",
+        lazy.group["scratchpad"].dropdown_toggle("ncmpcpp"),
+        "Toggle ncmpcpp scratchpad",
+    ),
+    (
+        [mod],
+        "c",
+        lazy.group["scratchpad"].dropdown_toggle("python"),
+        "Toggle python scratchpad",
+    ),
 ]
 
 scratchpad = ScratchPad("scratchpad", dropdowns)

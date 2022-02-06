@@ -6,30 +6,33 @@ import asyncio
 import os
 import subprocess
 
-from libqtile import hook, qtile
-from libqtile.backend.wayland.window import Window
+from libqtile import hook, qtile, backend
+
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
 IS_XEPHYR = int(os.environ.get("QTILE_XEPHYR", 0))
 mod = "mod1" if IS_XEPHYR else "mod4"
 
-term = 'footclient'
+term = "footclient"
 keys_backend = []
 
 
 # Keys to change VT
-keys_backend.extend([
-    ([mod], 'F1',     lazy.core.change_vt(1),    "Change to VT 1"),
-    ([mod], 'F2',     lazy.core.change_vt(2),    "Change to VT 2"),
-    ([mod], 'F3',     lazy.core.change_vt(3),    "Change to VT 3"),
-    ([mod], 'F4',     lazy.core.change_vt(4),    "Change to VT 4"),
-])
+keys_backend.extend(
+    [
+        ([mod], "F1", lazy.core.change_vt(1), "Change to VT 1"),
+        ([mod], "F2", lazy.core.change_vt(2), "Change to VT 2"),
+        ([mod], "F3", lazy.core.change_vt(3), "Change to VT 3"),
+        ([mod], "F4", lazy.core.change_vt(4), "Change to VT 4"),
+    ]
+)
 
 
 # Configure input devices
 try:
     from libqtile.backend.wayland import InputConfig
+
     wl_input_rules = {
         "type:keyboard": InputConfig(
             kb_options="caps:swapescape,altwin:swap_alt_win",
@@ -47,12 +50,18 @@ except ImportError:
 
 
 @hook.subscribe.client_new
-def _(window):
+def _(win):
     # Auto-float some windows
-    if type(window) is Window:
-        state = window.surface.toplevel._ptr.current
+    if isinstance(win, base.Window):
+        state = win.surface.toplevel._ptr.current
         if 0 < state.max_width < 1920:
-            window.floating = True
+            win.floating = True
+
+
+@hook.subscribe.client_managed
+def _(win):
+    if win.name == "Firefox — Sharing Indicator":
+        win.place(win.x + win.borderwidth, 0, win.width, win.height, 0, None)
 
 
 @hook.subscribe.startup_once
@@ -67,7 +76,7 @@ async def _():
     env["WOB_PADDING"] = "0"
     env["WOB_BACKGROUND"] = "#00000000"
     env["WOB_BAR"] = "#66CFCCD6"
-    HOME = os.path.expanduser('~')
+    HOME = os.path.expanduser("~")
     p = subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
     hook.subscribe.shutdown(p.terminate)
 
