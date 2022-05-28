@@ -6,8 +6,10 @@ import asyncio
 import os
 import subprocess
 
-from libqtile import hook, qtile, backend
-
+from libqtile import hook, qtile
+from libqtile.backend import base
+from libqtile.backend.wayland import InputConfig
+from libqtile.backend.wayland.window import XdgWindow, XWindow
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
@@ -28,34 +30,33 @@ keys_backend.extend(
     ]
 )
 
-
-# Configure input devices
-try:
-    from libqtile.backend.wayland import InputConfig
-
-    wl_input_rules = {
-        "type:keyboard": InputConfig(
-            kb_options="caps:swapescape,altwin:swap_alt_win",
-            kb_layout="gb",
-            kb_repeat_rate=35,
-            kb_repeat_delay=250,
-        ),
-        "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
-            drag=True, tap=True, dwt=False, pointer_accel=0.3
-        ),
-        "type:pointer": InputConfig(pointer_accel=-0.9),
-    }
-except ImportError:
-    wl_input_rules = None
+# Inputs configuration
+wl_input_rules = {
+    "type:keyboard": InputConfig(
+        kb_options="caps:swapescape,altwin:swap_alt_win",
+        kb_layout="gb",
+        kb_repeat_rate=35,
+        kb_repeat_delay=250,
+    ),
+    "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
+        drag=True, tap=True, dwt=False, pointer_accel=0.3
+    ),
+    "type:pointer": InputConfig(pointer_accel=-0.9),
+}
 
 
 @hook.subscribe.client_new
 def _(win):
     # Auto-float some windows
-    if isinstance(win, base.Window):
-        state = win.surface.toplevel._ptr.current
-        if 0 < state.max_width < 1920:
+    if isinstance(win, XdgWindow):
+        max_width = win.surface.toplevel._ptr.current.max_width
+        if 0 < max_width < 1920:
             win.floating = True
+    elif isinstance(win, XWindow):
+        if hints := win.surface.size_hints:
+            max_width = hints.max_width
+            if 0 < max_width < 1920:
+                win.floating = True
 
 
 @hook.subscribe.client_managed

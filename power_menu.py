@@ -50,7 +50,7 @@ def show_power_menu(qtile):
         width=1000,
         height=200,
         controls=controls,
-        background="00000060",
+        background="000000c0",
         initial_focus=2,
     ).show(centered=True)
 

@@ -82,8 +82,6 @@ theme = dict(
 colours = [theme[f"color{n}"] for n in range(16)]
 background = theme["background"]
 foreground = theme["foreground"]
-bw = 6
-cw = 5
 colour_focussed = "#6fa3e0"
 colour_unfocussed = "#0e101c"
 inner_gaps = 8
@@ -108,8 +106,8 @@ my_keys.extend(keys_group)
 my_keys.extend(keys_scratchpad)
 my_keys.extend(keys_power_menu)
 
-reload("fullscreen_state")
-from fullscreen_state import toggle_fullscreen_state
+# reload("fullscreen_state")
+# from fullscreen_state import toggle_fullscreen_state
 
 
 def float_to_front(qtile: Qtile) -> None:
@@ -124,7 +122,7 @@ my_keys.extend(
         # Window management
         ([mod, "control"], "q", lazy.window.kill(), "Close window"),
         ([mod], "f", lazy.window.toggle_fullscreen(), "Toggle fullscreen"),
-        ([mod], "g", lazy.function(toggle_fullscreen_state), "Toggle fullscreen state"),
+        # ([mod], "g", lazy.function(toggle_fullscreen_state), "Toggle fullscreen state"),
         ([mod, "shift"], "space", lazy.window.toggle_floating(), "Toggle floating"),
         (
             [mod],
@@ -144,9 +142,9 @@ my_keys.extend(
         ([mod, alt], "k", lazy.layout.grow_up(), "Grow up"),
         ([mod, alt], "h", lazy.layout.grow_left(), "Grow left"),
         ([mod, alt], "l", lazy.layout.grow_right(), "Grow right"),
-        ([mod, "shift"], "r", lazy.reload_config(), "Reload the config"),
-        ([mod, "control"], "r", lazy.restart(), "Restart Qtile"),
+        ([mod, "control"], "r", lazy.reload_config(), "Reload the config"),
         ([mod, "control"], "Escape", lazy.shutdown(), "Shutdown Qtile"),
+        ([mod], "Tab", lazy.next_layout(), "Next layout"),
         ([mod], "b", lazy.hide_show_bar("bottom"), "Hide bar"),
         # Volume control - MyVolume widget is defined further down
         ([], "XF86AudioMute", lazy.widget["myvolume"].mute(), "Mute audio"),
@@ -194,16 +192,16 @@ my_keys.extend(
         (
             [mod],
             "bracketright",
-            lazy.widget["mpd2"].function(lambda w: w.button_press(0, 0, 5)),
+            lazy.spawn("playerctl next"),
             "Next song",
         ),
         (
             [mod],
             "bracketleft",
-            lazy.widget["mpd2"].function(lambda w: w.button_press(0, 0, 4)),
+            lazy.spawn("playerctl previous"),
             "Previous song",
         ),
-        ([], "Pause", lazy.spawn("mpc toggle"), "Play/unpause music"),
+        ([], "Pause", lazy.spawn("playerctl play-pause"), "Play/unpause music"),
         # Launchers
         ([mod], "d", lazy.spawn("rofi -show run"), "Spawn with rofi"),
         ([mod], "Return", lazy.spawn(term), "Spawn terminal"),
@@ -256,15 +254,19 @@ layouts = [
         wrap_focus_rows=False,
         margin=0,
         margin_on_single=4,
-        corner_radius=cw,
     ),
+    # layout.Stack(
+    #    border_width=5,
+    #    border_focus=border_focus,
+    #    border_normal="00000000",
+    #    margin=0,
+    # ),
 ]
 
 floating_layout = layout.Floating(
     border_width=3,
     border_focus=border_focus,
     border_normal="00000000",
-    corner_radius=cw,
     fullscreen_border_width=0,
     float_rules=[
         Match(title="Open File"),
@@ -273,6 +275,7 @@ floating_layout = layout.Floating(
         Match(wm_class="thunar"),
         Match(title="Firefox — Sharing Indicator"),
         Match(wm_class="Arandr"),
+        Match(wm_class="eog"),
         Match(wm_class="org.gnome.clocks"),
         Match(wm_class="org.kde.ark"),
         Match(wm_class="confirm"),
@@ -283,6 +286,7 @@ floating_layout = layout.Floating(
         Match(wm_class="file_progress"),
         Match(wm_class="imv"),
         Match(wm_class="lxappearance"),
+        Match(wm_class="matplotlib"),
         Match(wm_class="mpv"),
         Match(wm_class="notification"),
         Match(wm_class="pavucontrol"),
@@ -293,6 +297,7 @@ floating_layout = layout.Floating(
         Match(wm_class="Dragon-drag-and-drop"),
         Match(wm_class="toolbar"),
         Match(wm_class="wlroots"),
+        Match(wm_class="wdisplays"),
         Match(wm_class="Xephyr"),
         Match(wm_type="dialog"),
         Match(role="gimp-file-export"),
@@ -323,14 +328,24 @@ groupbox_config = {
     "fontsize": 12,
 }
 
-mpd2 = widget.Mpd2(
-    no_connection="",
-    status_format="mpd here" if IS_XEPHYR else "{artist} - {title}",
-    status_format_stopped="",
+# mpd2 = widget.Mpd2(
+#    no_connection="",
+#    status_format="{artist} - {title}",
+#    status_format_stopped="",
+#    foreground=colours[12],
+#    idle_format="",
+#    font="TamzenForPowerline Bold",
+#    update_interval=10,
+#    scroll=True,
+# )
+
+mpd2 = widget.Mpris2(
+    name="mpris",
+    objname=None,
+    display_metadata=["xesam:title", "xesam:artist"],
     foreground=colours[12],
-    idle_format="",
     font="TamzenForPowerline Bold",
-    update_interval=10,
+    scroll_interval=0,
 )
 
 
@@ -476,17 +491,19 @@ date = widget.Clock(
     font="TamzenForPowerline Bold",
     foreground=colours[7],
     update_interval=60,
+    name="date",
 )
 
 time = widget.Clock(
     fontsize=20,
     font="TamzenForPowerline Medium",
     update_interval=60,
+    name="time",
 )
 
 groupboxes = [
-    widget.GroupBox(**groupbox_config, visible_groups=["1", "2", "3", "q", "w", "e"]),
-    widget.GroupBox(**groupbox_config, visible_groups=["q", "w", "e"]),
+    widget.GroupBox(**groupbox_config),
+    widget.GroupBox(**groupbox_config, visible_groups=["q", "w", "e", "r"]),
 ]
 
 
@@ -494,18 +511,18 @@ groupboxes = [
 def _():
     # Set up initial GroupBox visible groups
     if len(qtile.screens) > 1:
-        groupboxes[0].visible_groups = ["1", "2", "3"]
+        groupboxes[0].visible_groups = ["1", "2", "3", "4"]
     else:
-        groupboxes[0].visible_groups = ["1", "2", "3", "q", "w", "e"]
+        groupboxes[0].visible_groups = None
 
 
 @hook.subscribe.screens_reconfigured
 def _():
     # Reconfigure GroupBox visible groups
     if len(qtile.screens) > 1:
-        groupboxes[0].visible_groups = ["1", "2", "3"]
+        groupboxes[0].visible_groups = ["1", "2", "3", "4"]
     else:
-        groupboxes[0].visible_groups = ["1", "2", "3", "q", "w", "e"]
+        groupboxes[0].visible_groups = None
     if hasattr(groupboxes[0], "bar"):
         groupboxes[0].bar.draw()
 
@@ -518,9 +535,9 @@ screens = [
         bottom=bar.Bar(
             [
                 groupboxes[0],
-                widget.Spacer(),
+                widget.Spacer(name="s1"),
                 mpd2,
-                widget.Spacer(),
+                widget.Spacer(name="s2"),
                 systray,
                 volume,
                 bklight,
@@ -542,9 +559,9 @@ screens = [
         bottom=bar.Bar(
             [
                 groupboxes[1],
-                widget.Spacer(),
+                widget.Spacer(name="s3"),
                 mpd2,
-                widget.Spacer(),
+                widget.Spacer(name="s4"),
                 volume,
                 bklight,
                 wlan,
