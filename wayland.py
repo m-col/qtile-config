@@ -45,6 +45,19 @@ wl_input_rules = {
 }
 
 
+# Shadows configuration
+#wl_shadows = {
+#    "radius": 12,
+#    "color": "#05001088",
+#    "offset": (-6, -6),
+#}
+wl_shadows = {
+    "radius": 5,
+    "color": "#ff000044",
+    "offset": (0, 0),
+}
+
+
 @hook.subscribe.client_new
 def _(win):
     # Auto-float some windows
