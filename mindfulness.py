@@ -23,7 +23,8 @@ from urllib import request
 from random import randint
 
 import gi
-gi.require_version('Gst', '1.0')
+
+gi.require_version("Gst", "1.0")
 from gi.repository import Gst
 
 from libqtile.log_utils import logger
@@ -86,7 +87,7 @@ class ReMindfulness(base.ThreadPoolText):
             logger.info("Downloading default tone for ReMindfulness widget")
             request.urlretrieve(self.default_url, self.audio_file)
 
-        playbin = Gst.ElementFactory.make('playbin', 'playbin')
+        playbin = Gst.ElementFactory.make("playbin", "playbin")
         playbin.props.uri = "file://" + self.audio_file
         playbin.set_state(Gst.State.PLAYING)
 

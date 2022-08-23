@@ -43,18 +43,19 @@ wl_input_rules = {
         drag=True, tap=True, dwt=False, pointer_accel=0.3
     ),
     "1e7d:2c38:ROCCAT ROCCAT Kiro Mouse": InputConfig(
-        left_handed=True, pointer_accel=-1.0,
+        left_handed=True,
+        pointer_accel=-1.0,
     ),
     "type:pointer": InputConfig(pointer_accel=-1.0),
 }
 
 
 # Shadows configuration
-#wl_shadows = {
+# wl_shadows = {
 #    "radius": 12,
 #    "color": "#05001088",
 #    "offset": (-6, -6),
-#}
+# }
 wl_shadows = {
     "radius": 5,
     "color": "#ff000044",

@@ -49,8 +49,8 @@ from scratchpad import keys_scratchpad, scratchpad
 reload("power_menu")
 from power_menu import keys_power_menu
 
-#reload("mindfulness")
-#from mindfulness import ReMindfulness
+# reload("mindfulness")
+# from mindfulness import ReMindfulness
 
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
@@ -211,7 +211,12 @@ my_keys.extend(
         ([], "Pause", lazy.spawn("playerctl play-pause"), "Play/unpause music"),
         ([], "XF86AudioPlay", lazy.spawn("playerctl play-pause"), "Play/unpause music"),
         # Launchers
-        ([mod], "d", lazy.spawn("rofi -show run -theme ~/.config/rofi/common.rasi"), "Spawn with rofi"),
+        (
+            [mod],
+            "d",
+            lazy.spawn("rofi -show run -theme ~/.config/rofi/common.rasi"),
+            "Spawn with rofi",
+        ),
         ([mod], "Return", lazy.spawn(term), "Spawn terminal"),
         ([mod, "shift"], "f", lazy.spawn("firefox"), "Spawn Firefox"),
         (
@@ -224,8 +229,18 @@ my_keys.extend(
         (["shift"], "Print", lazy.spawn("screenshot"), "Screenshot to file"),
         ([mod], "p", lazy.spawn("get_password_rofi"), "Keepass passwords"),
         ([mod], "i", lazy.spawn("systemctl suspend -i"), "Suspend system"),
-        ([mod, "shift"], "i", lazy.spawn("gtklock & systemctl suspend -i", shell=True), "Suspend and lock"),
-        ([mod, "shift"], "p", lazy.widget["pomodoro"].toggle_active(), "Toggle Pomodoro"),
+        (
+            [mod, "shift"],
+            "i",
+            lazy.spawn("gtklock & systemctl suspend -i", shell=True),
+            "Suspend and lock",
+        ),
+        (
+            [mod, "shift"],
+            "p",
+            lazy.widget["pomodoro"].toggle_active(),
+            "Toggle Pomodoro",
+        ),
     ]
 )
 
@@ -263,7 +278,7 @@ layouts = [
         wrap_focus_columns=False,
         wrap_focus_rows=False,
         margin=0,
-        #margin_on_single=30,  # 4
+        # margin_on_single=30,  # 4
     ),
     # layout.Stack(
     #    border_width=5,
@@ -447,12 +462,12 @@ wlan = widget.Wlan(
     update_interval=5,
 )
 
-#mind = ReMindfulness(
+# mind = ReMindfulness(
 #    "",
 #    reminder_text="MIND!",
 #    reminder_background=colours[2],
 #    foreground=colours[2],
-#)
+# )
 
 
 class MyBattery(Battery):
@@ -531,7 +546,8 @@ time = widget.Clock(
 groupboxes = [
     widget.GroupBox(**groupbox_config),
     widget.GroupBox(**groupbox_config, visible_groups=["q", "w", "e", "r"]),
-    ]
+]
+
 
 @hook.subscribe.startup
 def _():
@@ -566,7 +582,7 @@ screens = [
                 widget.Spacer(name="s2"),
                 pomodoro,
                 systray,
-                #mind,
+                # mind,
                 volume,
                 bklight,
                 wlan,
