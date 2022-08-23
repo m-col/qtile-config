@@ -10,6 +10,7 @@ import importlib
 import os
 import subprocess
 import sys
+import re
 from typing import TYPE_CHECKING
 
 from libqtile import bar, hook, layout, qtile, widget
@@ -48,12 +49,15 @@ from scratchpad import keys_scratchpad, scratchpad
 reload("power_menu")
 from power_menu import keys_power_menu
 
+#reload("mindfulness")
+#from mindfulness import ReMindfulness
+
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
 reload(qtile.core.name)
 if IS_WAYLAND:
-    from wayland import keys_backend, term, wl_input_rules  # noqa: F401
+    from wayland import keys_backend, term, wl_input_rules, wl_shadows  # noqa: F401
 else:
     from x11 import keys_backend, term, wmname  # noqa: F401
 
@@ -124,6 +128,7 @@ my_keys.extend(
         ([mod], "f", lazy.window.toggle_fullscreen(), "Toggle fullscreen"),
         # ([mod], "g", lazy.function(toggle_fullscreen_state), "Toggle fullscreen state"),
         ([mod, "shift"], "space", lazy.window.toggle_floating(), "Toggle floating"),
+        ([mod, "shift"], "s", lazy.window.static(), "Make window static"),
         (
             [mod],
             "space",
@@ -195,15 +200,18 @@ my_keys.extend(
             lazy.spawn("playerctl next"),
             "Next song",
         ),
+        ([], "XF86AudioNext", lazy.spawn("playerctl next"), "Next song"),
         (
             [mod],
             "bracketleft",
             lazy.spawn("playerctl previous"),
             "Previous song",
         ),
+        ([], "XF86AudioPrev", lazy.spawn("playerctl previous"), "Previous song"),
         ([], "Pause", lazy.spawn("playerctl play-pause"), "Play/unpause music"),
+        ([], "XF86AudioPlay", lazy.spawn("playerctl play-pause"), "Play/unpause music"),
         # Launchers
-        ([mod], "d", lazy.spawn("rofi -show run"), "Spawn with rofi"),
+        ([mod], "d", lazy.spawn("rofi -show run -theme ~/.config/rofi/common.rasi"), "Spawn with rofi"),
         ([mod], "Return", lazy.spawn(term), "Spawn terminal"),
         ([mod, "shift"], "f", lazy.spawn("firefox"), "Spawn Firefox"),
         (
@@ -216,6 +224,8 @@ my_keys.extend(
         (["shift"], "Print", lazy.spawn("screenshot"), "Screenshot to file"),
         ([mod], "p", lazy.spawn("get_password_rofi"), "Keepass passwords"),
         ([mod], "i", lazy.spawn("systemctl suspend -i"), "Suspend system"),
+        ([mod, "shift"], "i", lazy.spawn("gtklock & systemctl suspend -i", shell=True), "Suspend and lock"),
+        ([mod, "shift"], "p", lazy.widget["pomodoro"].toggle_active(), "Toggle Pomodoro"),
     ]
 )
 
@@ -253,7 +263,7 @@ layouts = [
         wrap_focus_columns=False,
         wrap_focus_rows=False,
         margin=0,
-        margin_on_single=4,
+        #margin_on_single=30,  # 4
     ),
     # layout.Stack(
     #    border_width=5,
@@ -269,9 +279,12 @@ floating_layout = layout.Floating(
     border_normal="00000000",
     fullscreen_border_width=0,
     float_rules=[
+        Match(title="Bluetooth Devices"),
         Match(title="Open File"),
         Match(title="Unlock Database - KeePassXC"),
         Match(title="File Operation Progress", wm_class="thunar"),
+        Match(title="File Operation Progress", wm_class="Thunar"),
+        Match(title=re.compile("Presenting: .*"), wm_class="libreoffice-impress"),
         Match(wm_class="thunar"),
         Match(title="Firefox — Sharing Indicator"),
         Match(wm_class="Arandr"),
@@ -299,6 +312,7 @@ floating_layout = layout.Floating(
         Match(wm_class="wlroots"),
         Match(wm_class="wdisplays"),
         Match(wm_class="Xephyr"),
+        Match(wm_class="zoom"),
         Match(wm_type="dialog"),
         Match(role="gimp-file-export"),
         Match(func=base.Window.has_fixed_size),
@@ -341,11 +355,11 @@ groupbox_config = {
 
 mpd2 = widget.Mpris2(
     name="mpris",
+    width=1000,
     objname=None,
     display_metadata=["xesam:title", "xesam:artist"],
     foreground=colours[12],
     font="TamzenForPowerline Bold",
-    scroll_interval=0,
 )
 
 
@@ -406,6 +420,11 @@ bklight = widget.Backlight(
     foreground=colours[3],
 )
 
+pomodoro = widget.Pomodoro(
+    prefix_inactive="",
+    foreground=colours[6],
+)
+
 volume = MyVolume(
     fontsize=18,
     channel="PCM",
@@ -427,6 +446,13 @@ wlan = widget.Wlan(
     foreground=colours[5],
     update_interval=5,
 )
+
+#mind = ReMindfulness(
+#    "",
+#    reminder_text="MIND!",
+#    reminder_background=colours[2],
+#    foreground=colours[2],
+#)
 
 
 class MyBattery(Battery):
@@ -498,14 +524,14 @@ time = widget.Clock(
     fontsize=20,
     font="TamzenForPowerline Medium",
     update_interval=60,
+    foreground=colours[7],
     name="time",
 )
 
 groupboxes = [
     widget.GroupBox(**groupbox_config),
     widget.GroupBox(**groupbox_config, visible_groups=["q", "w", "e", "r"]),
-]
-
+    ]
 
 @hook.subscribe.startup
 def _():
@@ -538,7 +564,9 @@ screens = [
                 widget.Spacer(name="s1"),
                 mpd2,
                 widget.Spacer(name="s2"),
+                pomodoro,
                 systray,
+                #mind,
                 volume,
                 bklight,
                 wlan,
@@ -552,7 +580,7 @@ screens = [
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
-        wallpaper="~/pictures/Wallpapers/q_triangles2.png",
+        wallpaper="~/pictures/Wallpapers/akira.png",
         wallpaper_mode="fill",
     ),
     Screen(
@@ -562,6 +590,7 @@ screens = [
                 widget.Spacer(name="s3"),
                 mpd2,
                 widget.Spacer(name="s4"),
+                pomodoro,
                 volume,
                 bklight,
                 wlan,
@@ -572,7 +601,7 @@ screens = [
             28,
             background=background + "00",
         ),
-        wallpaper="~/pictures/Wallpapers/q_triangles2.png",
+        wallpaper="~/pictures/Wallpapers/akira.png",
         wallpaper_mode="fill",
         top=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),

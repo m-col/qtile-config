@@ -11,7 +11,8 @@ IS_XEPHYR = int(os.environ.get("QTILE_XEPHYR", 0))
 mod = "mod1" if IS_XEPHYR else "mod4"
 
 
-term = "xterm" if IS_XEPHYR else "urxvt"  # urxvt doesn't like xephyr
+#term = "xterm" if IS_XEPHYR else "urxvt"  # urxvt doesn't like xephyr
+term = "xterm"
 wmname = "LG3D"
 keys_backend = []
 

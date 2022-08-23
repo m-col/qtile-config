@@ -9,7 +9,8 @@ import subprocess
 from libqtile import hook, qtile
 from libqtile.backend import base
 from libqtile.backend.wayland import InputConfig
-from libqtile.backend.wayland.window import XdgWindow, XWindow
+from libqtile.backend.wayland.xdgwindow import XdgWindow
+from libqtile.backend.wayland.xwindow import XWindow
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
@@ -41,7 +42,10 @@ wl_input_rules = {
     "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
         drag=True, tap=True, dwt=False, pointer_accel=0.3
     ),
-    "type:pointer": InputConfig(pointer_accel=-0.9),
+    "1e7d:2c38:ROCCAT ROCCAT Kiro Mouse": InputConfig(
+        left_handed=True, pointer_accel=-1.0,
+    ),
+    "type:pointer": InputConfig(pointer_accel=-1.0),
 }
 
 

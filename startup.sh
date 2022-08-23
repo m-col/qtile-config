@@ -23,17 +23,26 @@ QTILE_PID=$PPID
 run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
 
 [[ -z "$QTILE_XEPHYR" ]] && {
-    kanshi &
-    wlsunset -t 2500 -T 5700 -l 55.7 -L -3.1 &
-    run_if_new firefox &
-    #run_if_new irc &
+    # Session setup
     systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+    dbus-update-activation-environment --systemd \
+	WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=$XDG_CURRENT_DESKTOP
+
+    # Services
+    kanshi &
+    wlsunset -t 1000 -T 6700 -l 55.7 -L -3.1 &
     swayidle &
     mpDris2 &
     sway-mpris-idle-inhibit &
-    playerctld daemon
-    check_systemd
+    playerctld daemon &
+    kdeconnect-indicator &
+
+    # Startup programs
+    run_if_new firefox &
     run_if_new geary &
+
+    # Notify me if any systemd services failed
+    check_systemd &
 } &> /dev/null
 
 

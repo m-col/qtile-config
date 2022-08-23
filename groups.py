@@ -32,10 +32,10 @@ groups: list[Group] = [
     Group("2", label="term"),
     Group("3", label="term"),
     Group("4", label="term"),
-    Group("q", label="surf", matches=[Match(wm_class="firefox")]),
-    Group("w", label="mail", matches=[Match(wm_class="geary"), Match(title="Geary")]),
+    Group("q", label="html", matches=[Match(wm_class="firefox")]),
+    Group("w", label="imap", matches=[Match(wm_class="geary"), Match(title="Geary")]),
     Group("e", label="work"),
-    Group("r", label="chat", matches=[Match(title="irc")]),
+    Group("r", label="spot", matches=[Match(title="spotify")]),
 ]
 
 

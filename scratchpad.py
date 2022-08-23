@@ -22,10 +22,7 @@ mod = "mod1" if IS_XEPHYR else "mod4"
 if IS_WAYLAND:
     term = "foot "
 else:
-    if IS_XEPHYR:
-        term = "xterm -e "
-    else:
-        term = "urxvt -e "
+    term = "xterm -e "
 
 
 conf = {
