@@ -268,8 +268,62 @@ mouse = [
 border_focus = [colours[5]]
 border_normal = "001122"
 
+class MyColumns(layout.Columns):
+    """
+    I only override this method so I can make 'foot' have wide margins at each side if
+    it's the only window open.
+    """
+    def configure(self, client, screen_rect):
+        pos = 0
+        for col in self.columns:
+            if client in col:
+                break
+            pos += col.width
+        else:
+            client.hide()
+            return
+        if client.has_focus:
+            color = self.border_focus if col.split else self.border_focus_stack
+        else:
+            color = self.border_normal if col.split else self.border_normal_stack
+        border = self.border_width
+        margin_size = self.margin
+        if len(self.columns) == 1 and (len(col) == 1 or not col.split):
+            if not self.border_on_single:
+                border = 0
+            if "foot" in client.get_wm_class():
+                margin_size = [0, 200, 0, 200]
+        width = int(0.5 + col.width * screen_rect.width * 0.01 / len(self.columns))
+        x = screen_rect.x + int(0.5 + pos * screen_rect.width * 0.01 / len(self.columns))
+        if col.split:
+            pos = 0
+            for c in col:
+                if client == c:
+                    break
+                pos += col.heights[c]
+            height = int(0.5 + col.heights[client] * screen_rect.height * 0.01 / len(col))
+            y = screen_rect.y + int(0.5 + pos * screen_rect.height * 0.01 / len(col))
+            client.place(
+                x, y, width - 2 * border, height - 2 * border, border, color, margin=margin_size
+            )
+            client.unhide()
+        elif client == col.cw:
+            client.place(
+                x,
+                screen_rect.y,
+                width - 2 * border,
+                screen_rect.height - 2 * border,
+                border,
+                color,
+                margin=margin_size,
+            )
+            client.unhide()
+        else:
+            client.hide()
+
+
 layouts = [
-    layout.Columns(
+    MyColumns(
         insert_position=1,
         border_width=5,
         border_focus=border_focus,
