@@ -39,14 +39,17 @@ wl_input_rules = {
         kb_repeat_rate=35,
         kb_repeat_delay=250,
     ),
+    # Zenbook touchpad
     "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
         drag=True, tap=True, dwt=False, pointer_accel=0.3
     ),
-    "1e7d:2c38:ROCCAT ROCCAT Kiro Mouse": InputConfig(
+    # Roccat Kiro mouse
+    "7805:11320:ROCCAT ROCCAT Kiro Mouse": InputConfig(
         left_handed=True,
         pointer_accel=-1.0,
     ),
-    "type:pointer": InputConfig(pointer_accel=-1.0),
+    # Anker mouse
+    "7119:5:USB Optical Mouse": InputConfig(pointer_accel=-1.0),
 }
 
 
