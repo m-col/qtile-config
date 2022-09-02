@@ -7,7 +7,6 @@ QTILE_PID=$PPID
 
 {
     foot --server &
-    #swaybg -c '#1B2021' &
 
     # wob
     FIFO=/tmp/wob-$WAYLAND_DISPLAY
@@ -24,9 +23,9 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
 
 [[ -z "$QTILE_XEPHYR" ]] && {
     # Session setup
-    systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+    systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP &
     dbus-update-activation-environment --systemd \
-	WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=$XDG_CURRENT_DESKTOP
+	WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=$XDG_CURRENT_DESKTOP &
 
     # Services
     kanshi &
