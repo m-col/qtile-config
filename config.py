@@ -291,7 +291,7 @@ class MyColumns(layout.Columns):
         if len(self.columns) == 1 and (len(col) == 1 or not col.split):
             if not self.border_on_single:
                 border = 0
-            if "foot" in client.get_wm_class():
+            if "foot" in (client.get_wm_class() or []):
                 margin_size = [0, 200, 0, 200]
         width = int(0.5 + col.width * screen_rect.width * 0.01 / len(self.columns))
         x = screen_rect.x + int(0.5 + pos * screen_rect.width * 0.01 / len(self.columns))
@@ -322,24 +322,25 @@ class MyColumns(layout.Columns):
             client.hide()
 
 
+# Weird custom behaviour here but isn't that what qtile is for?
+# I want a Columns layout but also sometimes i want 'foot' windows to be thinner and
+# centred in a 'central' column, so I define a whole new MyColumns layout that does that
+# and I just jump between the two when I want that.
+col_opts = dict(
+    insert_position=1,
+    border_width=5,
+    border_focus=border_focus,
+    border_normal="00000000",
+    border_on_single=False,
+    wrap_focus_columns=False,
+    wrap_focus_rows=False,
+    margin=0,
+    # margin_on_single=30,  # 4
+)
+
 layouts = [
-    MyColumns(
-        insert_position=1,
-        border_width=5,
-        border_focus=border_focus,
-        border_normal="00000000",
-        border_on_single=False,
-        wrap_focus_columns=False,
-        wrap_focus_rows=False,
-        margin=0,
-        # margin_on_single=30,  # 4
-    ),
-    # layout.Stack(
-    #    border_width=5,
-    #    border_focus=border_focus,
-    #    border_normal="00000000",
-    #    margin=0,
-    # ),
+    MyColumns(**col_opts),
+    layout.Columns(**col_opts),
 ]
 
 floating_layout = layout.Floating(
