@@ -172,25 +172,25 @@ my_keys.extend(
         (
             [],
             "XF86MonBrightnessUp",
-            lazy.widget["backlight"].change_backlight(ChangeDirection.UP, 5),
+            lazy.widget["backlight"].change_backlight(ChangeDirection.UP, 3),
             "Increase backlight",
         ),
         (
             [],
             "XF86MonBrightnessDown",
-            lazy.widget["backlight"].change_backlight(ChangeDirection.DOWN, 5),
+            lazy.widget["backlight"].change_backlight(ChangeDirection.DOWN, 3),
             "Decrease backlight",
         ),
         (
             [mod],
             "F6",
-            lazy.widget["backlight"].change_backlight(ChangeDirection.UP, 5),
+            lazy.widget["backlight"].change_backlight(ChangeDirection.UP, 3),
             "Increase backlight",
         ),
         (
             [mod],
             "F5",
-            lazy.widget["backlight"].change_backlight(ChangeDirection.DOWN, 5),
+            lazy.widget["backlight"].change_backlight(ChangeDirection.DOWN, 3),
             "Decrease backlight",
         ),
         # Music control
