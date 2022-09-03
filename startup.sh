@@ -29,7 +29,7 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
 
     # Services
     kanshi &
-    wlsunset -t 1000 -T 6700 -l 55.7 -L -3.1 &
+    pkill wlsunset; wlsunset -t 1000 -T 6700 -l 55.7 -L -3.1 &
     swayidle &
     mpDris2 &
     sway-mpris-idle-inhibit &
