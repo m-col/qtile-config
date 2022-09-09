@@ -7,12 +7,10 @@ import os
 import subprocess
 
 from libqtile import hook, qtile
-from libqtile.backend import base
 from libqtile.backend.wayland import InputConfig
 from libqtile.backend.wayland.xdgwindow import XdgWindow
 from libqtile.backend.wayland.xwindow import XWindow
 from libqtile.lazy import lazy
-from libqtile.log_utils import logger
 
 IS_XEPHYR = int(os.environ.get("QTILE_XEPHYR", 0))
 mod = "mod1" if IS_XEPHYR else "mod4"
@@ -82,8 +80,16 @@ def _(win):
 
 @hook.subscribe.client_managed
 def _(win):
+    # Some other miscellaneous rules
     if win.name == "Firefox — Sharing Indicator":
         win.place(win.x + win.borderwidth, 0, win.width, win.height, 0, None)
+        return
+
+    wm_class = win.get_wm_class() or []
+    if win.name == "Navigator" and "libreoffice-startcenter" in wm_class:
+        x = qtile.current_screen.x
+        win.place(x, 240, 450, 600, win.borderwidth, win.bordercolor)
+        return
 
 
 @hook.subscribe.startup_once
@@ -101,6 +107,29 @@ async def _():
     HOME = os.path.expanduser("~")
     p = subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
     hook.subscribe.shutdown(p.terminate)
+
+
+@hook.subscribe.screen_change
+def _(*_):
+    # Temporary hacky fix for the dell monitor on my desk which for some mysterious
+    # reason doesn't advertise that it supports any HD mode. Qtile does support setting
+    # custom modes via the protocol, but neither kanshi nor wdisplays do. So instead,
+    # I'll detect if that monitor is present and set the desired custom mode here.
+    for output in qtile.core.outputs:
+        wlr_output = output.wlr_output
+        # Not only does this monitor not report modes correctly, it ALSO doesn't report
+        # a make or model.
+        if wlr_output.make == wlr_output.model == "<Unknown>":
+            if wlr_output.current_mode.width == 1024:
+                break
+    else:
+        return
+
+    wlr_output.set_custom_mode(1920, 1080, 0)
+    # Lastly, while cmd_reconfigure_screens will be fired right after this hook, as it
+    # gets subscribed to this hook right after the config is loaded, the backend doesn't
+    # get a change to actually apply the mode, so let's flush it.
+    qtile.core.flush()
 
 
 if IS_XEPHYR:

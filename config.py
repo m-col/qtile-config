@@ -110,9 +110,6 @@ my_keys.extend(keys_group)
 my_keys.extend(keys_scratchpad)
 my_keys.extend(keys_power_menu)
 
-# reload("fullscreen_state")
-# from fullscreen_state import toggle_fullscreen_state
-
 
 def float_to_front(qtile: Qtile) -> None:
     """Bring all floating windows of the group to front"""
@@ -126,7 +123,6 @@ my_keys.extend(
         # Window management
         ([mod, "control"], "q", lazy.window.kill(), "Close window"),
         ([mod], "f", lazy.window.toggle_fullscreen(), "Toggle fullscreen"),
-        # ([mod], "g", lazy.function(toggle_fullscreen_state), "Toggle fullscreen state"),
         ([mod, "shift"], "space", lazy.window.toggle_floating(), "Toggle floating"),
         ([mod, "shift"], "s", lazy.window.static(), "Make window static"),
         (
@@ -369,6 +365,7 @@ floating_layout = layout.Floating(
         Match(wm_class="file_progress"),
         Match(wm_class="imv"),
         Match(wm_class="lxappearance"),
+        Match(wm_class="nm-connection-editor"),
         Match(wm_class="matplotlib"),
         Match(wm_class="mpv"),
         Match(wm_class="notification"),
@@ -622,29 +619,6 @@ def _():
         groupboxes[0].visible_groups = None
     if hasattr(groupboxes[0], "bar"):
         groupboxes[0].bar.draw()
-
-
-@hook.subscribe.screen_change
-def _(*_):
-    # Temporary hacky fix for the dell monitor on my desk which for some mysterious
-    # reason doesn't advertise that it supports any HD mode. Qtile does support setting
-    # custom modes via the protocol, but neither kanshi nor wdisplays do. So instead,
-    # I'll detect if that monitor is present and set the desired custom mode here.
-    for output in qtile.core.outputs:
-        wlr_output = output.wlr_output
-        # Not only does this monitor not report modes correctly, it ALSO doesn't report
-        # a make or model.
-        if wlr_output.make == wlr_output.model == "<Unknown>":
-            if wlr_output.current_mode.width == 1024:
-                break
-    else:
-        return
-
-    wlr_output.set_custom_mode(1920, 1080, 0)
-    # Lastly, while cmd_reconfigure_screens will be fired right after this hook, as it
-    # gets subscribed to this hook right after the config is loaded, the backend doesn't
-    # get a change to actually apply the mode, so let's flush it.
-    qtile.core.flush()
 
 
 bar_border_width = [0, 3, 0, 3]
