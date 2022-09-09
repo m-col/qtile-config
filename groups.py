@@ -24,18 +24,18 @@ if TYPE_CHECKING:
 
 mod = "mod1" if int(os.environ.get("QTILE_XEPHYR", 0)) else "mod4"
 
-keys_group: tuple[list[str], str, Any, str] = []
+keys_group: list[tuple[list[str], str, Any, str]] = []
 
 
 groups: list[Group] = [
     Group("1", label="term"),
     Group("2", label="term"),
     Group("3", label="term"),
-    Group("4", label="term"),
+    Group("4", label="spot", matches=[Match(title="spotify")]),
     Group("q", label="html", matches=[Match(wm_class="firefox")]),
     Group("w", label="imap", matches=[Match(wm_class="geary"), Match(title="Geary")]),
     Group("e", label="work"),
-    Group("r", label="spot", matches=[Match(title="spotify")]),
+    Group("r", label="work"),
 ]
 
 
