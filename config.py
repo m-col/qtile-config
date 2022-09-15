@@ -5,15 +5,14 @@ Qtile main config file
 
 from __future__ import annotations
 
-import asyncio
 import importlib
 import os
+import re
 import subprocess
 import sys
-import re
 from typing import TYPE_CHECKING
 
-from libqtile import bar, hook, layout, qtile, widget
+from libqtile import bar, hook, layout, qtile, utils, widget
 from libqtile.backend import base
 from libqtile.config import Click, Drag, Key, Match, Screen
 from libqtile.lazy import lazy
@@ -33,6 +32,7 @@ def reload(module):
 
 
 import traverse
+from toggle_debug import toggle_debug
 
 use_tags = False
 
@@ -147,6 +147,7 @@ my_keys.extend(
         ([mod, "control"], "Escape", lazy.shutdown(), "Shutdown Qtile"),
         ([mod], "Tab", lazy.next_layout(), "Next layout"),
         ([mod], "b", lazy.hide_show_bar("bottom"), "Hide bar"),
+        ([mod, "control"], "d", lazy.function(toggle_debug), "Toggle debug logging"),
         # Volume control - MyVolume widget is defined further down
         ([], "XF86AudioMute", lazy.widget["myvolume"].mute(), "Mute audio"),
         ([mod], "F10", lazy.widget["myvolume"].mute(), "Mute audio"),
@@ -264,11 +265,13 @@ mouse = [
 border_focus = [colours[5]]
 border_normal = "001122"
 
+
 class MyColumns(layout.Columns):
     """
     I only override this method so I can make 'foot' have wide margins at each side if
     it's the only window open.
     """
+
     def configure(self, client, screen_rect):
         pos = 0
         for col in self.columns:
@@ -290,17 +293,27 @@ class MyColumns(layout.Columns):
             if "foot" in (client.get_wm_class() or []):
                 margin_size = [0, 200, 0, 200]
         width = int(0.5 + col.width * screen_rect.width * 0.01 / len(self.columns))
-        x = screen_rect.x + int(0.5 + pos * screen_rect.width * 0.01 / len(self.columns))
+        x = screen_rect.x + int(
+            0.5 + pos * screen_rect.width * 0.01 / len(self.columns)
+        )
         if col.split:
             pos = 0
             for c in col:
                 if client == c:
                     break
                 pos += col.heights[c]
-            height = int(0.5 + col.heights[client] * screen_rect.height * 0.01 / len(col))
+            height = int(
+                0.5 + col.heights[client] * screen_rect.height * 0.01 / len(col)
+            )
             y = screen_rect.y + int(0.5 + pos * screen_rect.height * 0.01 / len(col))
             client.place(
-                x, y, width - 2 * border, height - 2 * border, border, color, margin=margin_size
+                x,
+                y,
+                width - 2 * border,
+                height - 2 * border,
+                border,
+                color,
+                margin=margin_size,
             )
             client.unhide()
         elif client == col.cw:
@@ -397,6 +410,8 @@ widget_defaults = {
     "fontsize": 16,
 }
 
+icon_font_size = 22
+
 groupbox_config = {
     "active": foreground,
     "highlight_method": "block",
@@ -463,17 +478,17 @@ class MyVolume(widget.Volume):
                 f.write(str(self.volume) + "\n")
 
     def cmd_increase_vol(self):
-        subprocess.call("amixer -c PCH set PCM 3%+".split())
+        subprocess.run("amixer -c PCH set PCM 3%+".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_decrease_vol(self):
-        subprocess.call("amixer -c PCH set PCM 3%-".split())
+        subprocess.run("amixer -c PCH set PCM 3%-".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
     def cmd_mute(self):
-        subprocess.call("amixer -c PCH set PCM toggle".split())
+        subprocess.run("amixer -c PCH set PCM toggle".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=False)
 
@@ -483,6 +498,7 @@ bklight = widget.Backlight(
     step=1,
     update_interval=None,
     format="",
+    fontsize=icon_font_size,
     change_command=None,
     foreground=colours[3],
 )
@@ -493,7 +509,7 @@ pomodoro = widget.Pomodoro(
 )
 
 volume = MyVolume(
-    fontsize=18,
+    fontsize=icon_font_size,
     channel="PCM",
     font="Font Awesome 5 Free",
     foreground=colours[4],
@@ -506,13 +522,6 @@ if IS_WAYLAND:
     systray = widget.StatusNotifier(padding=20)
 else:
     systray = widget.Systray(padding=20, icon_size=24)
-
-wlan = widget.Wlan(
-    format="",
-    disconnected_message="",
-    foreground=colours[5],
-    update_interval=5,
-)
 
 # mind = ReMindfulness(
 #    "",
@@ -576,13 +585,14 @@ battery = MyBattery(
     low_percentage=0.12,
     foreground=colours[6],
     notify_below=12,
+    fontsize=icon_font_size + 10,
 )
 
 date = widget.Clock(
     format="%e/%m/%g",
     fontsize=16,
     font="TamzenForPowerline Bold",
-    foreground=colours[7],
+    foreground=foreground,
     update_interval=60,
     name="date",
 )
@@ -591,7 +601,7 @@ time = widget.Clock(
     fontsize=20,
     font="TamzenForPowerline Medium",
     update_interval=60,
-    foreground=colours[7],
+    foreground=foreground,
     name="time",
 )
 
@@ -637,7 +647,6 @@ screens = [
                 # mind,
                 volume,
                 bklight,
-                wlan,
                 battery,
                 date,
                 time,
@@ -661,7 +670,6 @@ screens = [
                 pomodoro,
                 volume,
                 bklight,
-                wlan,
                 battery,
                 date,
                 time,

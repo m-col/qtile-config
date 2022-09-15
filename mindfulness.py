@@ -19,17 +19,16 @@
 # SOFTWARE.
 
 import os
-from urllib import request
 from random import randint
+from urllib import request
 
 import gi
 
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst
-
 from libqtile.log_utils import logger
-from libqtile.widget import base
 from libqtile.utils import get_cache_dir
+from libqtile.widget import base
 
 Gst.init(None)
 

@@ -95,17 +95,8 @@ def _(win):
 @hook.subscribe.startup_once
 async def _():
     # Run a startup script
-    env = os.environ.copy()
-    env["WOB_HEIGHT"] = "28"
-    env["WOB_WIDTH"] = "1920"
-    env["WOB_MARGIN"] = "0"
-    env["WOB_OFFSET"] = "0"
-    env["WOB_BORDER"] = "0"
-    env["WOB_PADDING"] = "0"
-    env["WOB_BACKGROUND"] = "#00000000"
-    env["WOB_BAR"] = "#66CFCCD6"
     HOME = os.path.expanduser("~")
-    p = subprocess.Popen(f"{HOME}/.config/qtile/startup.sh", shell=True, env=env)
+    p = subprocess.Popen(f"{HOME}/.config/qtile/startup.sh")
     hook.subscribe.shutdown(p.terminate)
 
 

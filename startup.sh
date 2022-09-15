@@ -2,20 +2,15 @@
 #
 # Qtile Wayland startup script
 
-QTILE_PID=$PPID
-
-
 {
     foot --server &
 
     # wob
     FIFO=/tmp/wob-$WAYLAND_DISPLAY
     test -e $FIFO || mkfifo $FIFO
-    tail -f $FIFO | wob -a bottom \
-	-M ${WOB_MARGIN:-0} -H ${WOB_HEIGHT:-32} -W ${WOB_WIDTH:-400} \
-	-o ${WOB_OFFSET:-0} -b ${WOB_BORDER:-0} -p ${WOB_PADDING:-0} \
-	--background-color ${WOB_BACKGROUND:-#ff000000} \
-	--bar-color ${WOB_BAR:-#00ffffff} -t 800 &
+    tail -f $FIFO | wob \
+	-a bottom -M 0 -H 28 -W 1920 -o 0 -b 0 -p 0 \
+	--background-color "#00000000" --bar-color "#66CFCCD6" -t 800 &
 
 } &> /dev/null
 
@@ -28,7 +23,7 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
 	WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=$XDG_CURRENT_DESKTOP &
 
     # Services
-    kanshi &
+    kanshi &>> ~/.local/share/qtile/qtile.log &
     wlsunset &
     swayidle &
     mpDris2 &

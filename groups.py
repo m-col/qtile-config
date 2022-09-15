@@ -28,14 +28,14 @@ keys_group: list[tuple[list[str], str, Any, str]] = []
 
 
 groups: list[Group] = [
-    Group("1", label="term"),
-    Group("2", label="term"),
-    Group("3", label="term"),
-    Group("4", label="spot", matches=[Match(title="spotify")]),
-    Group("q", label="html", matches=[Match(wm_class="firefox")]),
-    Group("w", label="imap", matches=[Match(wm_class="geary"), Match(title="Geary")]),
-    Group("e", label="work"),
-    Group("r", label="work"),
+    Group("1", label="html", matches=[Match(wm_class="firefox")]),
+    Group("2", label="mail", matches=[Match(wm_class="geary"), Match(title="Geary")]),
+    Group("3", label="tune", matches=[Match(title="spotify")]),
+    Group("4", label="term"),
+    Group("q", label="term"),
+    Group("w", label="term"),
+    Group("e", label="term"),
+    Group("r", label="term"),
 ]
 
 
@@ -121,12 +121,14 @@ def _():
     if len(qtile.screens) > 1:
         qtile.groups_map["1"].cmd_toscreen(0, toggle=False)
         qtile.groups_map["q"].cmd_toscreen(1, toggle=False)
+        qtile.focus_screen(1)
 
 
-@hook.subscribe.screen_change
-def _(_):
+@hook.subscribe.screens_reconfigured
+def _():
     # Set groups to screens
     if len(qtile.screens) > 1:
         if qtile.screens[0].group.name not in "1234":
             qtile.groups_map["1"].cmd_toscreen(0, toggle=False)
-        qtile.groups_map["q"].cmd_toscreen(1, toggle=False)
+        if qtile.screens[1].group.name in "1234":
+            qtile.groups_map["q"].cmd_toscreen(1, toggle=False)
