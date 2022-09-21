@@ -238,6 +238,12 @@ my_keys.extend(
             lazy.widget["pomodoro"].toggle_active(),
             "Toggle Pomodoro",
         ),
+        (
+            ["control"],
+            "space",
+            lazy.spawn("swaync-client -t"),
+            "Toggle notification panel",
+        ),
     ]
 )
 
