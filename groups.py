@@ -30,8 +30,8 @@ keys_group: list[tuple[list[str], str, Any, str]] = []
 groups: list[Group] = [
     Group("1", label="html", matches=[Match(wm_class="firefox")]),
     Group("2", label="mail", matches=[Match(wm_class="geary"), Match(title="Geary")]),
-    Group("3", label="tune", matches=[Match(title="spotify")]),
-    Group("4", label="term"),
+    Group("3", label="term"),
+    Group("4", label="tune", matches=[Match(title="spotify")]),
     Group("q", label="term"),
     Group("w", label="term"),
     Group("e", label="term"),
