@@ -26,14 +26,15 @@ run_if_new() { ps aux | grep -v grep | grep -q $1 || $@; }
     kanshi &>> ~/.local/share/qtile/qtile.log &
     wlsunset &
     swayidle &
+    swaync &
     mpDris2 &
     sway-mpris-idle-inhibit &
     playerctld daemon &
-    kdeconnect-indicator &
+    #kdeconnect-indicator &
 
     # Startup programs
-    run_if_new firefox &
-    run_if_new geary &
+    #run_if_new firefox &
+    #run_if_new geary &
 
     # Notify me if any systemd services failed
     check_systemd &
