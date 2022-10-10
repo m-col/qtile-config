@@ -150,4 +150,4 @@ if IS_XEPHYR:
     @hook.subscribe.startup_once
     async def _():
         await asyncio.sleep(0.5)
-        qtile.cmd_reconfigure_screens()
+        qtile.reconfigure_screens()

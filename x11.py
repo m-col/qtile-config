@@ -38,7 +38,7 @@ keys_backend.extend(
 @hook.subscribe.client_new
 def _(window):
     if window.window.get_wm_type() == "desktop":
-        window.cmd_static(qtile.current_screen.index)
+        window.static(qtile.current_screen.index)
         return
 
     hints = window.window.get_wm_normal_hints()

@@ -57,7 +57,7 @@ def _toggle_tag(_qtile, to_toggle: str):
     for name, match, windows in tags:
         if name == to_toggle:
             for window in windows:
-                window.cmd_toggle_minimize()
+                window.toggle_minimize()
             return
 
 

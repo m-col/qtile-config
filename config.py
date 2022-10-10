@@ -115,7 +115,7 @@ def float_to_front(qtile: Qtile) -> None:
     """Bring all floating windows of the group to front"""
     for window in qtile.current_group.windows:
         if window.floating:
-            window.cmd_bring_to_front()
+            window.bring_to_front()
 
 
 my_keys.extend(
@@ -705,7 +705,7 @@ def _(_):
     for window in qtile.windows_map.values():
         if isinstance(window, base.Static):
             if hasattr(window, "cmd_bring_to_front"):
-                window.cmd_bring_to_front()
+                window.bring_to_front()
 
 
 reconfigure_screens = True

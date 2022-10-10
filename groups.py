@@ -49,18 +49,18 @@ def _go_to_group(name: str) -> Callable:
 
     def _inner(qtile: Qtile) -> None:
         if len(qtile.screens) == 1:
-            qtile.groups_map[name].cmd_toscreen(toggle=True)
+            qtile.groups_map[name].toscreen(toggle=True)
             return
 
         old = qtile.current_screen.group.name
         if name in "1234":
             qtile.focus_screen(0)
             if old in "1234" or qtile.current_screen.group.name != name:
-                qtile.groups_map[name].cmd_toscreen(toggle=True)
+                qtile.groups_map[name].toscreen(toggle=True)
         else:
             qtile.focus_screen(1)
             if old in "qwer" or qtile.current_screen.group.name != name:
-                qtile.groups_map[name].cmd_toscreen(toggle=True)
+                qtile.groups_map[name].toscreen(toggle=True)
 
     return _inner
 
@@ -94,7 +94,7 @@ def _scroll_screen(direction: int) -> Callable:
         if len(qtile.screens) == 1:
             current = qtile.groups.index(qtile.current_group)
             destination = (current + direction) % 8
-            qtile.groups[destination].cmd_toscreen()
+            qtile.groups[destination].toscreen()
             return
 
         current = qtile.groups.index(qtile.current_group)
@@ -102,7 +102,7 @@ def _scroll_screen(direction: int) -> Callable:
             destination = (current + direction) % 4
         else:
             destination = ((current - 4 + direction) % 4) + 4
-        qtile.groups[destination].cmd_toscreen()
+        qtile.groups[destination].toscreen()
 
     return _inner
 
@@ -119,8 +119,8 @@ keys_group.extend(
 def _():
     # Set initial groups
     if len(qtile.screens) > 1:
-        qtile.groups_map["1"].cmd_toscreen(0, toggle=False)
-        qtile.groups_map["q"].cmd_toscreen(1, toggle=False)
+        qtile.groups_map["1"].toscreen(0, toggle=False)
+        qtile.groups_map["q"].toscreen(1, toggle=False)
         qtile.focus_screen(1)
 
 
@@ -129,6 +129,6 @@ def _():
     # Set groups to screens
     if len(qtile.screens) > 1:
         if qtile.screens[0].group.name not in "1234":
-            qtile.groups_map["1"].cmd_toscreen(0, toggle=False)
+            qtile.groups_map["1"].toscreen(0, toggle=False)
         if qtile.screens[1].group.name in "1234":
-            qtile.groups_map["q"].cmd_toscreen(1, toggle=False)
+            qtile.groups_map["q"].toscreen(1, toggle=False)
