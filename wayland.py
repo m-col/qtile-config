@@ -34,7 +34,7 @@ wl_input_rules = {
     "type:keyboard": InputConfig(
         kb_options="caps:swapescape,altwin:swap_alt_win",
         kb_layout="gb",
-        kb_repeat_rate=35,
+        kb_repeat_rate=50,
         kb_repeat_delay=250,
     ),
     # Zenbook touchpad
@@ -79,7 +79,7 @@ def _(win):
 
 
 @hook.subscribe.client_managed
-def _(win):
+async def _(win):
     # Some other miscellaneous rules
     if win.name == "Firefox — Sharing Indicator":
         win.place(win.x + win.borderwidth, 0, win.width, win.height, 0, None)
@@ -89,6 +89,28 @@ def _(win):
     if win.name == "Navigator" and "libreoffice-startcenter" in wm_class:
         x = qtile.current_screen.x
         win.place(x, 240, 450, 600, win.borderwidth, win.bordercolor)
+        return
+
+    if "mpv" in wm_class:
+        # Resizing mpv if it's sized itself too big to fit on screen
+        sw = qtile.current_screen.width
+        sh = qtile.current_screen.height
+        x = y = w = h = None
+        if win.height > sh:
+            h = sh
+            y = qtile.current_screen.y
+        if win.width > sw:
+            w = sw
+            x = qtile.current_screen.x
+        if w is not None or h is not None:
+            if h is None:
+                h = win.height
+                y = win.y
+            else:
+                w = win.width
+                x = win.x
+            bw = win.borderwidth
+            win.place(x - bw, y - bw, w + 2 * bw, h + 2 * bw, 0, None)
         return
 
 

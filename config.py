@@ -244,6 +244,12 @@ my_keys.extend(
             lazy.spawn("swaync-client -t"),
             "Toggle notification panel",
         ),
+        (
+            [mod, "control"],
+            "y",
+            lazy.spawn("yt-first"),
+            "yt-first script",
+        ),
     ]
 )
 
@@ -395,6 +401,7 @@ floating_layout = layout.Floating(
         Match(wm_class="Dragon"),
         Match(wm_class="Dragon-drag-and-drop"),
         Match(wm_class="toolbar"),
+        Match(wm_class="tridactyl"),
         Match(wm_class="wlroots"),
         Match(wm_class="wdisplays"),
         Match(wm_class="Xephyr"),
