@@ -490,17 +490,17 @@ class MyVolume(widget.Volume):
             with open(self.wob, "a") as f:
                 f.write(str(self.volume) + "\n")
 
-    def cmd_increase_vol(self):
+    def increase_vol(self):
         subprocess.run("amixer -c PCH set PCM 3%+".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
-    def cmd_decrease_vol(self):
+    def decrease_vol(self):
         subprocess.run("amixer -c PCH set PCM 3%-".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=IS_WAYLAND)
 
-    def cmd_mute(self):
+    def mute(self):
         subprocess.run("amixer -c PCH set PCM toggle".split(), capture_output=True)
         self.volume = self.get_volume()
         self._update_drawer(wob=False)
@@ -704,8 +704,7 @@ def _(_):
     # Keep Static windows on top
     for window in qtile.windows_map.values():
         if isinstance(window, base.Static):
-            if hasattr(window, "cmd_bring_to_front"):
-                window.bring_to_front()
+            window.bring_to_front()
 
 
 reconfigure_screens = True

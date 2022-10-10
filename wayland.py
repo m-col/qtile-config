@@ -139,7 +139,7 @@ def _(*_):
         return
 
     wlr_output.set_custom_mode(1920, 1080, 0)
-    # Lastly, while cmd_reconfigure_screens will be fired right after this hook, as it
+    # Lastly, while reconfigure_screens will be fired right after this hook, as it
     # gets subscribed to this hook right after the config is loaded, the backend doesn't
     # get a change to actually apply the mode, so let's flush it.
     qtile.core.flush()
