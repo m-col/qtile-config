@@ -19,6 +19,10 @@ from libqtile.lazy import lazy
 from libqtile.widget.backlight import ChangeDirection
 from libqtile.widget.battery import Battery, BatteryState
 
+import qtile_extras.widget as widget_extras
+
+assert qtile is not None
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -49,9 +53,6 @@ from scratchpad import keys_scratchpad, scratchpad
 reload("power_menu")
 from power_menu import keys_power_menu
 
-# reload("mindfulness")
-# from mindfulness import ReMindfulness
-
 IS_WAYLAND: bool = qtile.core.name == "wayland"
 IS_XEPHYR: bool = int(os.environ.get("QTILE_XEPHYR", 0)) > 0
 
@@ -64,7 +65,7 @@ else:
 # Colours
 theme = dict(
     foreground="#CFCCD6",
-    background="#1B2021",
+    background="#0C1F20",
     color0="#030405",
     color8="#1f1c32",
     color1="#8742a5",
@@ -124,6 +125,7 @@ my_keys.extend(
         ([mod, "control"], "q", lazy.window.kill(), "Close window"),
         ([mod], "f", lazy.window.toggle_fullscreen(), "Toggle fullscreen"),
         ([mod, "shift"], "space", lazy.window.toggle_floating(), "Toggle floating"),
+        ([mod], "s", lazy.spawn("ddg_rofi"), "Search web via rofi"),
         ([mod, "shift"], "s", lazy.window.static(), "Make window static"),
         (
             [mod],
@@ -233,15 +235,9 @@ my_keys.extend(
             "Suspend and lock",
         ),
         (
-            [mod, "shift"],
-            "p",
-            lazy.widget["pomodoro"].toggle_active(),
-            "Toggle Pomodoro",
-        ),
-        (
             ["control"],
             "space",
-            lazy.spawn("swaync-client -t"),
+            lazy.spawn("swaync-client -t -sw"),
             "Toggle notification panel",
         ),
         (
@@ -257,24 +253,93 @@ my_keys.extend(
 # Mouse control
 mouse = [
     Click([mod], "Button2", lazy.window.kill()),
+
+    # Move with drag or swipe
     Drag(
         [mod],
         "Button1",
         lazy.window.set_position_floating(),
-        # move_snap_window(snap_dist=20),
         start=lazy.window.get_position(),
     ),
+    #Swipe(
+    #    [mod],
+    #    3,
+    #    lazy.window.set_position_floating(),
+    #    start=lazy.window.get_position(),
+    #),
+
+    # Resize with drag or swipe
     Drag(
         [mod, alt],
         "Button1",
         lazy.window.set_size_floating(),
         start=lazy.window.get_size(),
     ),
+    #Swipe(
+    #    [mod, alt],
+    #    3,
+    #    lazy.window.set_size_floating(),
+    #    start=lazy.window.get_size(),
+    #),
+
+    # Slide between groups
+    Drag(
+        [mod, "shift"],
+        "Button1",
+        lazy.screen.group_slide(),
+        start=lazy.screen.start_group_slide(scale=2.5),
+    ),
 ]
 
+if IS_WAYLAND:
+    try:
+        from libqtile.config import Swipe
+    except ImportError:
+        pass
+    else:
+
+        def _slide(qtile):
+            groups = qtile.groups
+            if len(qtile.screens) > 1:
+                if qtile.current_screen.index == 0:
+                    groups = groups[:4]
+                else:
+                    groups = groups[4:]
+            return qtile.current_screen.start_group_slide(
+                groups=groups, scale=1.6, inertia_threshold=15,
+            )
+
+        mouse.append(
+            Swipe(
+                [],
+                3 if IS_XEPHYR else 4,
+                lazy.screen.group_slide(),
+                start=lazy.function(_slide),
+            ),
+        )
+
+
+## Firefox 3-finger vertical swipe to zoom
+#def swipe_zoom(qtile, _dx: int, dy: int) -> None:
+#    if dy % 3:
+#        # Only send key every 10 steps
+#        return
+#    if dy < 0:
+#        qtile.spawn("wlrctl keyboard type +", shell=True)
+#    else:
+#        qtile.spawn("wlrctl keyboard type -", shell=True)
+#
+#
+#mouse.append(
+#    Swipe(
+#        [],
+#        3,
+#        lazy.function(swipe_zoom).when(focused=Match(wm_class="firefox")),
+#    )
+#)
 
 # Layouts
-border_focus = [colours[5]]
+border_focus = [colours[5], "323974"]
 border_normal = "001122"
 
 
@@ -370,47 +435,48 @@ floating_layout = layout.Floating(
     border_normal="00000000",
     fullscreen_border_width=0,
     float_rules=[
+        Match(func=base.Window.has_fixed_size),
+        Match(func=base.Window.has_fixed_ratio),
+        Match(func=lambda c: bool(c.is_transient_for())),
+        Match(role="gimp-file-export"),
         Match(title="Bluetooth Devices"),
+        Match(title="File Operation Progress", wm_class=re.compile("[Tt]hunar")),
+        Match(title="Firefox — Sharing Indicator"),
+        Match(title="KDE Connect Daemon"),
         Match(title="Open File"),
         Match(title="Unlock Database - KeePassXC"),
-        Match(title="File Operation Progress", wm_class="thunar"),
-        Match(title="File Operation Progress", wm_class="Thunar"),
+        Match(title="KeePassXC -  Access Request"),
         Match(title=re.compile("Presenting: .*"), wm_class="libreoffice-impress"),
-        Match(wm_class="thunar"),
-        Match(title="Firefox — Sharing Indicator"),
         Match(wm_class="Arandr"),
-        Match(wm_class="eog"),
-        Match(wm_class="org.gnome.clocks"),
-        Match(wm_class="org.kde.ark"),
+        Match(wm_class="Dragon"),
+        Match(wm_class="Dragon-drag-and-drop"),
+        Match(wm_class="Pinentry-gtk-2"),
+        Match(wm_class="Xephyr"),
         Match(wm_class="confirm"),
         Match(wm_class="dialog"),
         Match(wm_class="download"),
+        Match(wm_class="eog"),
         Match(wm_class="error"),
-        Match(wm_class="fiji-Main"),
         Match(wm_class="file_progress"),
         Match(wm_class="imv"),
+        Match(wm_class="io.github.celluloid_player.Celluloid"),
         Match(wm_class="lxappearance"),
-        Match(wm_class="nm-connection-editor"),
         Match(wm_class="matplotlib"),
-        Match(wm_class="mpv"),
+        #Match(wm_class="mpv"),
+        Match(wm_class="nm-connection-editor"),
         Match(wm_class="notification"),
+        Match(wm_class="org.gnome.clocks"),
+        Match(wm_class="org.kde.ark"),
         Match(wm_class="pavucontrol"),
-        Match(wm_class="Pinentry-gtk-2"),
         Match(wm_class="qt5ct"),
         Match(wm_class="ssh-askpass"),
-        Match(wm_class="Dragon"),
-        Match(wm_class="Dragon-drag-and-drop"),
+        Match(wm_class="thunar"),
         Match(wm_class="toolbar"),
         Match(wm_class="tridactyl"),
-        Match(wm_class="wlroots"),
         Match(wm_class="wdisplays"),
-        Match(wm_class="Xephyr"),
+        Match(wm_class="wlroots"),
         Match(wm_class="zoom"),
         Match(wm_type="dialog"),
-        Match(role="gimp-file-export"),
-        Match(func=base.Window.has_fixed_size),
-        Match(func=lambda c: bool(c.is_transient_for())),
-        Match(title="KDE Connect Daemon"),
     ],
 )
 
@@ -418,7 +484,7 @@ floating_layout = layout.Floating(
 # Screens and Bars
 widget_defaults = {
     "padding": 10,
-    "foreground": foreground,
+    "foreground": colours[6],
     "font": "Font Awesome 5 Free",
     "fontsize": 16,
 }
@@ -452,8 +518,7 @@ mpd2 = widget.Mpris2(
     name="mpris",
     width=1000,
     objname=None,
-    display_metadata=["xesam:title", "xesam:artist"],
-    foreground=colours[12],
+    format="{xesam:title} - {xesam:artist}",
     font="TamzenForPowerline Bold",
 )
 
@@ -470,12 +535,8 @@ class MyVolume(widget.Volume):
             self.text = ""
         else:
             self.text = ""
-        # drawing here crashes Wayland
 
-        if IS_WAYLAND:
-            self.wob = "/tmp/wob-" + qtile.core.display_name
-
-    def _update_drawer(self, wob=False):
+    def _update_drawer(self):
         if self.volume <= 0:
             self.text = ""
         elif self.volume <= 15:
@@ -486,62 +547,41 @@ class MyVolume(widget.Volume):
             self.text = ""
         self.draw()
 
-        if wob:
-            with open(self.wob, "a") as f:
-                f.write(str(self.volume) + "\n")
-
     def increase_vol(self):
         subprocess.run("amixer -c PCH set PCM 3%+".split(), capture_output=True)
         self.volume = self.get_volume()
-        self._update_drawer(wob=IS_WAYLAND)
 
     def decrease_vol(self):
         subprocess.run("amixer -c PCH set PCM 3%-".split(), capture_output=True)
         self.volume = self.get_volume()
-        self._update_drawer(wob=IS_WAYLAND)
 
     def mute(self):
         subprocess.run("amixer -c PCH set PCM toggle".split(), capture_output=True)
         self.volume = self.get_volume()
-        self._update_drawer(wob=False)
 
 
 bklight = widget.Backlight(
-    backlight_name=os.listdir("/sys/class/backlight")[0],
+    backlight_name=os.listdir("/sys/class/backlight")[-1],
     step=1,
     update_interval=None,
     format="",
     fontsize=icon_font_size,
     change_command=None,
-    foreground=colours[3],
-)
-
-pomodoro = widget.Pomodoro(
-    prefix_inactive="",
-    foreground=colours[6],
 )
 
 volume = MyVolume(
     fontsize=icon_font_size,
     channel="PCM",
     font="Font Awesome 5 Free",
-    foreground=colours[4],
     update_interval=60,
     cardid="PCH",
     device=None,
 )
 
 if IS_WAYLAND:
-    systray = widget.StatusNotifier(padding=20)
+    systray = widget_extras.StatusNotifier(padding=20)
 else:
     systray = widget.Systray(padding=20, icon_size=24)
-
-# mind = ReMindfulness(
-#    "",
-#    reminder_text="MIND!",
-#    reminder_background=colours[2],
-#    foreground=colours[2],
-# )
 
 
 class MyBattery(Battery):
@@ -596,7 +636,6 @@ battery = MyBattery(
     low_background=colours[1],
     show_short_text=False,
     low_percentage=0.12,
-    foreground=colours[6],
     notify_below=12,
     fontsize=icon_font_size + 10,
 )
@@ -605,7 +644,6 @@ date = widget.Clock(
     format="%e/%m/%g",
     fontsize=16,
     font="TamzenForPowerline Bold",
-    foreground=foreground,
     update_interval=60,
     name="date",
 )
@@ -614,7 +652,6 @@ time = widget.Clock(
     fontsize=20,
     font="TamzenForPowerline Medium",
     update_interval=60,
-    foreground=foreground,
     name="time",
 )
 
@@ -644,20 +681,18 @@ def _():
         groupboxes[0].bar.draw()
 
 
-bar_border_width = [0, 3, 0, 3]
-bar_border_color = ["000000", colours[5], "000000", colours[5]]
+#bar_border_width = [0, 3, 0, 3]
+#bar_border_color = ["000000", colours[5], "000000", colours[5]]
 
 screens = [
     Screen(
-        bottom=bar.Bar(
+        top=bar.Bar(
             [
                 groupboxes[0],
                 widget.Spacer(name="s1"),
                 mpd2,
                 widget.Spacer(name="s2"),
-                pomodoro,
                 systray,
-                # mind,
                 volume,
                 bklight,
                 battery,
@@ -665,22 +700,21 @@ screens = [
                 time,
             ],
             28,
-            background=background + "00",
+            background=background,
         ),
-        top=bar.Gap(outer_gaps),
+        bottom=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
-        wallpaper="~/pictures/Wallpapers/akira.png",
-        wallpaper_mode="fill",
+        #wallpaper="~/pictures/Wallpapers/fractal.bmp",
+        #wallpaper_mode="fill",
     ),
     Screen(
-        bottom=bar.Bar(
+        top=bar.Bar(
             [
                 groupboxes[1],
                 widget.Spacer(name="s3"),
                 mpd2,
                 widget.Spacer(name="s4"),
-                pomodoro,
                 volume,
                 bklight,
                 battery,
@@ -688,11 +722,11 @@ screens = [
                 time,
             ],
             28,
-            background=background + "00",
+            background=background,
         ),
-        wallpaper="~/pictures/Wallpapers/akira.png",
-        wallpaper_mode="fill",
-        top=bar.Gap(outer_gaps),
+        #wallpaper="~/pictures/Wallpapers/fractal.bmp",
+        #wallpaper_mode="fill",
+        bottom=bar.Gap(outer_gaps),
         left=bar.Gap(outer_gaps),
         right=bar.Gap(outer_gaps),
     ),
@@ -712,7 +746,7 @@ follow_mouse_focus = True
 bring_front_click = True
 cursor_warp = False
 auto_fullscreen = True
-focus_on_window_activation = "smart"
+focus_on_window_activation = "focus"
 
 keys = [Key(mods, key, cmd, desc=desc) for mods, key, cmd, desc in my_keys]
 groups.append(scratchpad)
