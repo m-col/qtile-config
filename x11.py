@@ -22,14 +22,14 @@ keys_backend.extend(
     [
         # ([mod],             'd',
         #   lazy.spawn('rofi -show run -theme ~/.config/rofi/common-large.rasi'), "rofi: run"),
-        ([], "XF86PowerOff", lazy.spawn("power-menu"), "Power menu"),
+        #([], "XF86PowerOff", lazy.spawn("power-menu"), "Power menu"),
         ([mod, "shift"], "x", lazy.spawn("set_monitors"), "Configure monitors"),
-        (
-            [mod, "shift"],
-            "i",
-            lazy.spawn("slock systemctl suspend -i"),
-            "Suspend system and lock",
-        ),
+        # (
+        #     [mod, "shift"],
+        #     "i",
+        #     lazy.spawn("slock systemctl suspend -i"),
+        #     "Suspend system and lock",
+        # ),
     ]
 )
 

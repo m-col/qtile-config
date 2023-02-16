@@ -10,6 +10,7 @@ from libqtile import hook, qtile
 from libqtile.backend.wayland import InputConfig
 from libqtile.backend.wayland.xdgwindow import XdgWindow
 from libqtile.backend.wayland.xwindow import XWindow
+from libqtile.backend.wayland.layer import LayerStatic
 from libqtile.lazy import lazy
 
 IS_XEPHYR = int(os.environ.get("QTILE_XEPHYR", 0))
@@ -37,13 +38,11 @@ wl_input_rules = {
         kb_repeat_rate=50,
         kb_repeat_delay=250,
     ),
-    # Zenbook touchpad
-    "1267:12377:ELAN1300:00 04F3:3059 Touchpad": InputConfig(
-        drag=True, tap=True, dwt=False, pointer_accel=0.3
-    ),
+    # All touchpads
+    "type:touchpad": InputConfig(drag=True, tap=True, dwt=False, pointer_accel=0.3),
     # Roccat Kiro mouse
     "7805:11320:ROCCAT ROCCAT Kiro Mouse": InputConfig(
-        left_handed=True,
+        #left_handed=True,
         pointer_accel=-1.0,
     ),
     # Anker mouse
@@ -122,32 +121,36 @@ async def _():
     hook.subscribe.shutdown(p.terminate)
 
 
-@hook.subscribe.screen_change
-def _(*_):
-    # Temporary hacky fix for the dell monitor on my desk which for some mysterious
-    # reason doesn't advertise that it supports any HD mode. Qtile does support setting
-    # custom modes via the protocol, but neither kanshi nor wdisplays do. So instead,
-    # I'll detect if that monitor is present and set the desired custom mode here.
-    for output in qtile.core.outputs:
-        wlr_output = output.wlr_output
-        # Not only does this monitor not report modes correctly, it ALSO doesn't report
-        # a make or model.
-        if wlr_output.make == wlr_output.model == "<Unknown>":
-            if wlr_output.current_mode.width == 1024:
-                break
-    else:
-        return
+## I don't use this monitor, but keep this around for testing
+#
+#@hook.subscribe.screen_change
+#def _(*_):
+#    # Temporary hacky fix for the dell monitor on my desk which for some mysterious
+#    # reason doesn't advertise that it supports any HD mode. Qtile does support setting
+#    # custom modes via the protocol, but neither kanshi nor wdisplays do. So instead,
+#    # I'll detect if that monitor is present and set the desired custom mode here.
+#    for output in qtile.core.outputs:
+#        wlr_output = output.wlr_output
+#        # Not only does this monitor not report modes correctly, it ALSO doesn't report
+#        # a make or model.
+#        if wlr_output.make == wlr_output.model == "<Unknown>":
+#            if wlr_output.current_mode.width == 1024:
+#                break
+#    else:
+#        return
+#
+#    wlr_output.set_custom_mode(1920, 1080, 0)
+#    # Lastly, while reconfigure_screens will be fired right after this hook, as it
+#    # gets subscribed to this hook right after the config is loaded, the backend doesn't
+#    # get a chance to actually apply the mode, so let's flush it.
+#    qtile.core.flush()
 
-    wlr_output.set_custom_mode(1920, 1080, 0)
-    # Lastly, while reconfigure_screens will be fired right after this hook, as it
-    # gets subscribed to this hook right after the config is loaded, the backend doesn't
-    # get a change to actually apply the mode, so let's flush it.
-    qtile.core.flush()
 
-
-if IS_XEPHYR:
-    # To adapt to whatever window size it was given
-    @hook.subscribe.startup_once
-    async def _():
-        await asyncio.sleep(0.5)
-        qtile.reconfigure_screens()
+## UNNECESSARY? The backend should update the output with reconfigre_screens=True
+#
+#if IS_XEPHYR:
+#    # To adapt to whatever window size it was given
+#    @hook.subscribe.startup_once
+#    async def _():
+#        await asyncio.sleep(0.5)
+#        qtile.reconfigure_screens()
